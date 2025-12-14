@@ -37,31 +37,54 @@ export default async function handler(
 
   // Extract path segments from catch-all route parameter
   // In Vercel, catch-all routes [...path] put segments in request.query.path as array or string
-  const pathParam = request.query.path;
+  // IMPORTANT: Always extract from URL pathname first for reliability (works in all scenarios)
   let pathArray: string[] = [];
   
-  if (Array.isArray(pathParam)) {
-    pathArray = pathParam;
-  } else if (typeof pathParam === "string") {
-    pathArray = pathParam.split("/").filter(Boolean);
-  }
-  
-  // Fallback: extract from URL pathname if path param not available
-  if (pathArray.length === 0 && request.url) {
+  // Primary method: Extract from URL pathname (most reliable, works even if query.path is missing)
+  if (request.url) {
     try {
-      const url = new URL(
-        request.url,
-        `http://${request.headers.host || "localhost"}`
-      );
+      // Handle both absolute and relative URLs
+      const urlString = request.url.startsWith("http") 
+        ? request.url 
+        : `http://${request.headers.host || "localhost"}${request.url}`;
+      
+      const url = new URL(urlString);
       const segments = url.pathname.split("/").filter(Boolean);
       const recipesIndex = segments.indexOf("recipes");
-      if (recipesIndex !== -1) {
+      if (recipesIndex !== -1 && recipesIndex < segments.length - 1) {
         pathArray = segments.slice(recipesIndex + 1);
       }
-    } catch {
-      // URL parsing failed
+    } catch (error) {
+      console.error("❌ [Recipes API] URL parsing error:", error);
+      // Fallback to query.path if URL parsing fails
+      const pathParam = request.query.path;
+      if (Array.isArray(pathParam)) {
+        pathArray = pathParam;
+      } else if (typeof pathParam === "string") {
+        pathArray = pathParam.split("/").filter(Boolean);
+      }
     }
   }
+  
+  // Fallback: Use request.query.path if URL parsing didn't work or returned empty
+  if (pathArray.length === 0) {
+    const pathParam = request.query.path;
+    if (Array.isArray(pathParam)) {
+      pathArray = pathParam;
+    } else if (typeof pathParam === "string") {
+      pathArray = pathParam.split("/").filter(Boolean);
+    }
+  }
+
+  // Debug logging for troubleshooting (can be removed in production)
+  console.log("🔍 [Recipes API] Path extraction:", {
+    url: request.url,
+    host: request.headers.host,
+    pathParam: request.query.path,
+    pathArray,
+    firstSegment: pathArray[0],
+    secondSegment: pathArray[1],
+  });
 
   const firstSegment = pathArray[0] || "";
   const secondSegment = pathArray[1] || "";
