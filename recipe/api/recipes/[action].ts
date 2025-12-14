@@ -1,12 +1,12 @@
 /**
- * Consolidated Recipes API Handler (Catch-All Route)
- * 
- * Handles multiple recipe endpoints using Vercel catch-all routing:
- * - /api/recipes/search → handled via path[0] === "search"
- * - /api/recipes/autocomplete → handled via path[0] === "autocomplete"
- * - /api/recipes/favourite → handled via path[0] === "favourite"
- * 
- * All original code preserved, consolidated to reduce serverless function count.
+ * Consolidated Recipes API Handler (Action Route)
+ *
+ * Handles multiple recipe endpoints using Vercel dynamic routing:
+ * - /api/recipes/search → handled via action === "search"
+ * - /api/recipes/autocomplete → handled via action === "autocomplete"
+ * - /api/recipes/favourite → handled via action === "favourite"
+ *
+ * Uses [action].ts instead of [...path].ts to avoid routing conflicts with [recipeId]/[...subpath].ts
  * Frontend calls remain exactly the same - no changes needed.
  */
 
@@ -15,7 +15,11 @@ import { VercelRequest, VercelResponse } from "@vercel/node";
 import { searchRecipes, autocompleteRecipes } from "../../lib/recipe-api.js";
 import { prisma } from "../../lib/prisma.js";
 import { getFavouriteRecipesByIDs } from "../../lib/recipe-api.js";
-import { setCorsHeaders, handleCorsPreflight, requireAuth } from "../../lib/api-utils.js";
+import {
+  setCorsHeaders,
+  handleCorsPreflight,
+  requireAuth,
+} from "../../lib/api-utils.js";
 
 export default async function handler(
   request: VercelRequest,
@@ -28,23 +32,18 @@ export default async function handler(
 
   setCorsHeaders(response);
 
-  // Extract path segments from catch-all route parameter
-  // In Vercel, catch-all routes [...path] put segments in request.query.path as array or string
-  const pathParam = request.query.path;
-  let endpoint = "";
-  
-  if (Array.isArray(pathParam)) {
-    endpoint = pathParam[0] || "";
-  } else if (typeof pathParam === "string") {
-    // If single string, split by slash to get segments
-    const segments = pathParam.split("/").filter(Boolean);
-    endpoint = segments[0] || "";
-  }
-  
-  // Fallback: extract from URL pathname if path param not available
+  // Extract action from dynamic route parameter [action]
+  // In Vercel, dynamic routes [action] put the value in request.query.action
+  const action = (request.query.action as string) || "";
+
+  // Fallback: extract from URL pathname if action param not available
+  let endpoint = action;
   if (!endpoint && request.url) {
     try {
-      const url = new URL(request.url, `http://${request.headers.host || "localhost"}`);
+      const url = new URL(
+        request.url,
+        `http://${request.headers.host || "localhost"}`
+      );
       const segments = url.pathname.split("/").filter(Boolean);
       const recipesIndex = segments.indexOf("recipes");
       if (recipesIndex !== -1 && segments[recipesIndex + 1]) {
@@ -53,13 +52,6 @@ export default async function handler(
     } catch {
       // URL parsing failed, use empty endpoint
     }
-  }
-
-  // IMPORTANT: If endpoint is numeric (recipeId), don't handle it here
-  // Let the [recipeId]/[...subpath].ts route handle it instead
-  // This prevents Vercel routing conflicts
-  if (endpoint && /^\d+$/.test(endpoint)) {
-    return response.status(404).json({ error: "Endpoint not found" });
   }
 
   try {
@@ -79,8 +71,12 @@ export default async function handler(
         diet: request.query.diet as string | undefined,
         intolerances: request.query.intolerances as string | undefined,
         equipment: request.query.equipment as string | undefined,
-        includeIngredients: request.query.includeIngredients as string | undefined,
-        excludeIngredients: request.query.excludeIngredients as string | undefined,
+        includeIngredients: request.query.includeIngredients as
+          | string
+          | undefined,
+        excludeIngredients: request.query.excludeIngredients as
+          | string
+          | undefined,
         type: request.query.type as string | undefined,
         instructionsRequired: request.query.instructionsRequired === "true",
         maxReadyTime: request.query.maxReadyTime
@@ -94,7 +90,10 @@ export default async function handler(
           : undefined,
         ignorePantry: request.query.ignorePantry === "true",
         sort: request.query.sort as string | undefined,
-        sortDirection: request.query.sortDirection as "asc" | "desc" | undefined,
+        sortDirection: request.query.sortDirection as
+          | "asc"
+          | "desc"
+          | undefined,
         minCalories: request.query.minCalories
           ? parseInt(request.query.minCalories as string, 10)
           : undefined,
@@ -324,7 +323,11 @@ export default async function handler(
         Object.entries(searchOptions).filter(([_, v]) => v !== undefined)
       );
 
-      const results = await searchRecipes(searchTerm, page, Object.keys(cleanOptions).length > 0 ? cleanOptions : undefined);
+      const results = await searchRecipes(
+        searchTerm,
+        page,
+        Object.keys(cleanOptions).length > 0 ? cleanOptions : undefined
+      );
 
       return response.status(200).json(results);
     }
@@ -332,16 +335,20 @@ export default async function handler(
     // Handle /api/recipes/autocomplete
     if (endpoint === "autocomplete" && request.method === "GET") {
       const query = request.query.query as string;
-      const number = request.query.number 
-        ? parseInt(request.query.number as string, 10) 
+      const number = request.query.number
+        ? parseInt(request.query.number as string, 10)
         : 10;
 
       if (!query || query.trim().length < 2) {
-        return response.status(400).json({ error: "Query must be at least 2 characters" });
+        return response
+          .status(400)
+          .json({ error: "Query must be at least 2 characters" });
       }
 
       if (isNaN(number) || number < 1 || number > 25) {
-        return response.status(400).json({ error: "Number must be between 1 and 25" });
+        return response
+          .status(400)
+          .json({ error: "Number must be between 1 and 25" });
       }
 
       const results = await autocompleteRecipes(query, number);
@@ -364,18 +371,16 @@ export default async function handler(
           return response.status(400).json({ error: "Recipe ID is required" });
         }
 
-        const existing = await prisma.favouriteRecipes.findUnique({
+        const existing = await prisma.favouriteRecipes.findFirst({
           where: {
-            recipeId_userId: {
-              recipeId: Number(recipeId),
-              userId: userId,
-            },
+            recipeId: Number(recipeId),
+            userId: userId,
           },
         });
 
         if (existing) {
-          return response.status(409).json({ 
-            error: "Recipe is already in favorites" 
+          return response.status(409).json({
+            error: "Recipe is already in favorites",
           });
         }
 
@@ -395,12 +400,16 @@ export default async function handler(
           return response.status(201).json(favouriteRecipe);
         } catch (createError: unknown) {
           const error = createError as Error;
-          if (error.message.includes("createdAt") || error.message.includes("does not exist")) {
+          if (
+            error.message.includes("createdAt") ||
+            error.message.includes("does not exist")
+          ) {
             console.warn("⚠️ [Favourite API] Database schema mismatch");
-            
+
             return response.status(500).json({
               error: "Database schema needs migration",
-              message: "Please run: npx prisma migrate deploy or npx prisma db push",
+              message:
+                "Please run: npx prisma migrate deploy or npx prisma db push",
               details: error.message,
             });
           }
@@ -434,24 +443,28 @@ export default async function handler(
           return response.status(200).json(favourites);
         } catch (apiError: unknown) {
           const error = apiError as { code?: number; message?: string };
-          const isApiLimitError = error?.code === 402 || 
-                                  error?.message?.includes("points limit") ||
-                                  error?.message?.includes("daily limit");
-          
+          const isApiLimitError =
+            error?.code === 402 ||
+            error?.message?.includes("points limit") ||
+            error?.message?.includes("daily limit");
+
           if (isApiLimitError) {
-            console.warn("⚠️ [Favourite API] Spoonacular API daily limit reached.");
-            
+            console.warn(
+              "⚠️ [Favourite API] Spoonacular API daily limit reached."
+            );
+
             return response.status(200).json({
-              results: recipeIds.map(id => ({
+              results: recipeIds.map((id) => ({
                 id: parseInt(id),
                 title: `Recipe #${id} (Details unavailable - API limit reached)`,
                 image: null,
                 _apiUnavailable: true,
               })),
-              _message: "Your favourites are saved, but recipe details are temporarily unavailable due to API daily limit."
+              _message:
+                "Your favourites are saved, but recipe details are temporarily unavailable due to API daily limit.",
             });
           }
-          
+
           throw apiError;
         }
       }
@@ -470,14 +483,22 @@ export default async function handler(
         }
 
         try {
-          await prisma.favouriteRecipes.delete({
+          // Find the record first using the compound unique constraint
+          const existing = await prisma.favouriteRecipes.findFirst({
             where: {
-              recipeId_userId: {
-                recipeId: Number(recipeId),
-                userId: userId,
-              },
+              recipeId: Number(recipeId),
+              userId: userId,
             },
           });
+
+          // Delete by id if found
+          if (existing) {
+            await prisma.favouriteRecipes.delete({
+              where: {
+                id: existing.id,
+              },
+            });
+          }
         } catch (deleteError: unknown) {
           const error = deleteError as { code?: string };
           if (error.code !== "P2025") {
@@ -490,33 +511,46 @@ export default async function handler(
     }
 
     // Method not allowed or endpoint not found
-    if (request.method !== "GET" && request.method !== "POST" && request.method !== "DELETE") {
+    if (
+      request.method !== "GET" &&
+      request.method !== "POST" &&
+      request.method !== "DELETE"
+    ) {
       return response.status(405).json({ error: "Method not allowed" });
     }
 
     return response.status(404).json({ error: "Endpoint not found" });
   } catch (error) {
     console.error("❌ [Recipes Consolidated API] Error:", error);
-    console.error("❌ [Recipes Consolidated API] Error type:", error instanceof Error ? error.constructor.name : typeof error);
-    console.error("❌ [Recipes Consolidated API] Error message:", error instanceof Error ? error.message : String(error));
-    
+    console.error(
+      "❌ [Recipes Consolidated API] Error type:",
+      error instanceof Error ? error.constructor.name : typeof error
+    );
+    console.error(
+      "❌ [Recipes Consolidated API] Error message:",
+      error instanceof Error ? error.message : String(error)
+    );
+
     if (error instanceof Error) {
       console.error("❌ [Recipes Consolidated API] Error stack:", error.stack);
     }
 
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    const statusCode = errorMessage.includes("limit") || errorMessage.includes("402") ? 402 : 500;
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    const statusCode =
+      errorMessage.includes("limit") || errorMessage.includes("402")
+        ? 402
+        : 500;
 
     if (error instanceof Error && error.message.includes("Unique constraint")) {
-      return response.status(409).json({ 
-        error: "Recipe is already in favorites" 
+      return response.status(409).json({
+        error: "Recipe is already in favorites",
       });
     }
 
-    return response.status(statusCode).json({ 
+    return response.status(statusCode).json({
       error: "Internal server error",
-      message: errorMessage
+      message: errorMessage,
     });
   }
 }
-
