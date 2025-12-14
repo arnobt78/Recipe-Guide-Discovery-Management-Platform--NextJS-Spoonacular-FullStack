@@ -1018,17 +1018,55 @@ const RecipeDetailCard = memo(({ recipe, onClose, isFavourite, onToggleFavourite
                                   {recipeInfo.winePairing.productMatches.map((product, idx) => (
                                     <div
                                       key={idx}
-                                      className="p-4 bg-slate-800/50 rounded-lg border border-purple-500/20"
+                                      className="p-4 bg-slate-800/50 rounded-lg border border-purple-500/20 hover:border-purple-500/40 transition-colors"
                                     >
-                                      <p className="text-white font-semibold mb-1">{product.title}</p>
-                                      <p className="text-sm text-gray-300 mb-2">{product.description}</p>
-                                      <div className="flex items-center gap-4">
-                                        <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
-                                          {product.price}
-                                        </Badge>
-                                        <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/30">
-                                          Rating: {product.averageRating}/5
-                                        </Badge>
+                                      <div className="flex gap-4">
+                                        {/* Product Image */}
+                                        {product.imageUrl && (
+                                          <div className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden border border-purple-500/20">
+                                            <img
+                                              src={product.imageUrl}
+                                              alt={product.title}
+                                              className="w-full h-full object-cover"
+                                              loading="lazy"
+                                              decoding="async"
+                                            />
+                                          </div>
+                                        )}
+                                        
+                                        <div className="flex-1 min-w-0">
+                                          <p className="text-white font-semibold mb-1">{product.title}</p>
+                                          {product.description && (
+                                            <p className="text-sm text-gray-300 mb-3">{product.description}</p>
+                                          )}
+                                          <div className="flex flex-wrap items-center gap-2">
+                                            <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
+                                              {product.price}
+                                            </Badge>
+                                            <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/30">
+                                              Rating: {product.averageRating.toFixed(1)}/5
+                                              {product.ratingCount > 0 && (
+                                                <span className="ml-1 text-xs">({product.ratingCount} reviews)</span>
+                                              )}
+                                            </Badge>
+                                            {product.score && (
+                                              <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
+                                                Score: {(product.score * 100).toFixed(0)}%
+                                              </Badge>
+                                            )}
+                                            {product.link && (
+                                              <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="bg-purple-500/10 border-purple-500/30 text-purple-300 hover:bg-purple-500/20"
+                                                onClick={() => window.open(product.link, '_blank', 'noopener,noreferrer')}
+                                              >
+                                                <ExternalLink className="h-3 w-3 mr-1" />
+                                                View on Amazon
+                                              </Button>
+                                            )}
+                                          </div>
+                                        </div>
                                       </div>
                                     </div>
                                   ))}

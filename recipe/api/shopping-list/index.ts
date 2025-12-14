@@ -13,6 +13,16 @@ import { VercelRequest, VercelResponse } from "@vercel/node";
 import { prisma } from "../../lib/prisma.js";
 import { setCorsHeaders, handleCorsPreflight, requireAuth } from "../../lib/api-utils.js";
 
+// Type definition for shopping list items (matches src/types.ts)
+interface ShoppingListItem {
+  name: string;
+  quantity: string;
+  unit?: string;
+  category: string;
+  recipeIds: number[];
+  checked?: boolean;
+}
+
 export default async function handler(
   request: VercelRequest,
   response: VercelResponse

@@ -16,7 +16,7 @@ import {
   UseMutationResult,
 } from "@tanstack/react-query";
 import * as api from "../api";
-import { Recipe, SearchRecipesResponse, RecipeInformation, SimilarRecipe, AutocompleteRecipe, DishPairingForWine } from "../types";
+import { Recipe, SearchRecipesResponse, RecipeInformation, SimilarRecipe, AutocompleteRecipe, DishPairingForWine, WinePairing } from "../types";
 import { toast } from "sonner";
 import { invalidateFavouritesQueries } from "../utils/queryInvalidation";
 import {
@@ -368,6 +368,36 @@ export function useDishPairingForWine(
     queryKey: ["wine", "dishes", wine],
     queryFn: () => api.getDishPairingForWine(wine!),
     enabled: enabled && !!wine && wine.trim().length > 0,
+    staleTime: Infinity, // Cache forever (wine pairings don't change)
+    gcTime: 5 * 60 * 1000,
+    retry: 1,
+    refetchOnMount: true,
+    placeholderData: (previousData) => previousData,
+  });
+}
+
+/**
+ * Hook to get wine pairing for food
+ * Finds wines that go well with a given food (dish, ingredient, or cuisine)
+ * 
+ * Caching Behavior:
+ * - Cache forever until invalidated
+ * - Wine pairings don't change frequently
+ *
+ * @param food - Food name (e.g., "steak", "salmon", "italian")
+ * @param maxPrice - Optional maximum price for wine recommendation in USD
+ * @param enabled - Whether to enable the query (default: true)
+ * @returns Query result with wine pairing information
+ */
+export function useWinePairing(
+  food: string | undefined,
+  maxPrice?: number,
+  enabled: boolean = true
+) {
+  return useQuery<WinePairing, Error>({
+    queryKey: ["wine", "pairing", food, maxPrice],
+    queryFn: () => api.getWinePairing(food!, maxPrice),
+    enabled: enabled && !!food && food.trim().length > 0,
     staleTime: Infinity, // Cache forever (wine pairings don't change)
     gcTime: 5 * 60 * 1000,
     retry: 1,

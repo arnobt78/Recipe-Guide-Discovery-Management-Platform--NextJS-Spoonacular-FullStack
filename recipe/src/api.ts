@@ -7,6 +7,7 @@ import {
   SimilarRecipe,
   AutocompleteRecipe,
   DishPairingForWine,
+  WinePairing,
   RecipeCollection,
   CollectionItem,
   RecipeNote,
@@ -664,6 +665,40 @@ export const getDishPairingForWine = async (
   }
 
   return response.json() as Promise<DishPairingForWine>;
+};
+
+/**
+ * Get wine pairing for food
+ * Finds wines that go well with a given food (dish, ingredient, or cuisine)
+ * 
+ * @param food - Food name (e.g., "steak", "salmon", "italian")
+ * @param maxPrice - Optional maximum price for wine recommendation in USD
+ * @returns Promise with wine pairing information
+ * @throws Error if request fails
+ */
+export const getWinePairing = async (
+  food: string,
+  maxPrice?: number
+): Promise<WinePairing> => {
+  let apiPath = getApiUrl(
+    `/api/food/wine/pairing?food=${encodeURIComponent(food)}`
+  );
+  
+  if (maxPrice !== undefined) {
+    apiPath += `&maxPrice=${encodeURIComponent(maxPrice)}`;
+  }
+  
+  const response = await fetch(apiPath);
+
+  if (!response.ok) {
+    const errorMessage = await extractErrorMessage(
+      response,
+      `Failed to get wine pairing for food. Status: ${response.status}`
+    );
+    throw new Error(errorMessage);
+  }
+
+  return response.json() as Promise<WinePairing>;
 };
 
 /**

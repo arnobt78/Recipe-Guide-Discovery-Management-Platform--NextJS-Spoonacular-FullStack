@@ -911,6 +911,82 @@ export const getDishPairingForWine = async (wine: string) => {
 };
 
 /**
+ * Get wine pairing for food
+ * Finds wines that go well with a given food (dish, ingredient, or cuisine)
+ * @param food - Food name (e.g., "steak", "salmon", "italian")
+ * @param maxPrice - Optional maximum price for wine recommendation in USD
+ * @returns Promise with wine pairing information
+ * @throws Error if API key is not found
+ */
+export const getWinePairing = async (food: string, maxPrice?: number) => {
+  const currentKey = getBestApiKey() || apiKey || getApiKey();
+  if (!currentKey) {
+    throw new Error("API Key not found");
+  }
+
+  if (!food || food.trim().length === 0) {
+    throw new Error("Food name is required");
+  }
+
+  const url = new URL("https://api.spoonacular.com/food/wine/pairing");
+  const params: Record<string, string> = {
+    apiKey: currentKey,
+    food: food.trim(),
+  };
+  
+  if (maxPrice !== undefined) {
+    params.maxPrice = maxPrice.toString();
+  }
+  
+  url.search = new URLSearchParams(params).toString();
+
+  const response = await fetch(url);
+  const json = await response.json();
+
+  // Handle API limit error
+  if (response.status === 402 || json.code === 402) {
+    handleApiLimitError(currentKey);
+    // Try fallback keys
+    let fallbackIndex = 2;
+    while (fallbackIndex <= 10) {
+      const fallbackKey = process.env[`API_KEY_${fallbackIndex}`];
+      if (fallbackKey) {
+        const cleanKey = fallbackKey.replace(/^["']|["']$/g, "");
+        if (cleanKey && cleanKey !== currentKey) {
+          const fallbackUrl = new URL("https://api.spoonacular.com/food/wine/pairing");
+          const fallbackParams: Record<string, string> = {
+            apiKey: cleanKey,
+            food: food.trim(),
+          };
+          if (maxPrice !== undefined) {
+            fallbackParams.maxPrice = maxPrice.toString();
+          }
+          fallbackUrl.search = new URLSearchParams(fallbackParams).toString();
+          
+          const fallbackResponse = await fetch(fallbackUrl);
+          const fallbackJson = await fallbackResponse.json();
+          
+          if (fallbackResponse.ok && fallbackJson.code !== 402) {
+            markApiKeyUsed(cleanKey);
+            apiKey = cleanKey;
+            process.env.API_KEY = cleanKey;
+            return fallbackJson;
+          } else if (fallbackResponse.status === 402 || fallbackJson.code === 402) {
+            handleApiLimitError(cleanKey);
+          }
+        }
+      }
+      fallbackIndex++;
+    }
+    
+    throw new Error("All API keys have reached their daily limit");
+  }
+
+  markApiKeyUsed(currentKey);
+  return json;
+};
+
+/**
  * Get favorite recipes by IDs
  * @param ids - Array of recipe IDs as strings
  * @returns Promise with favorite recipes data

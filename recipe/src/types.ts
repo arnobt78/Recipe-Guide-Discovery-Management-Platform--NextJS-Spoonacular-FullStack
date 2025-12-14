@@ -212,6 +212,26 @@ export interface DishPairingForWine {
 }
 
 /**
+ * Wine Pairing interface - matches Spoonacular API /food/wine/pairing endpoint
+ * Finds wines that go well with a given food
+ */
+export interface WinePairing {
+  pairedWines: string[];
+  pairingText: string;
+  productMatches: Array<{
+    id: number;
+    title: string;
+    description: string | null;
+    price: string;
+    imageUrl: string;
+    averageRating: number;
+    ratingCount: number;
+    score: number;
+    link: string;
+  }>;
+}
+
+/**
  * Similar Recipe interface - matches Spoonacular API /recipes/{id}/similar endpoint
  */
 export interface SimilarRecipe {
