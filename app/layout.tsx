@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Auth0Provider } from "@auth0/auth0-react";
@@ -51,49 +53,55 @@ const auth0Domain = process.env.NEXT_PUBLIC_AUTH0_DOMAIN || "";
 const auth0ClientId = process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID || "";
 const auth0Audience = process.env.NEXT_PUBLIC_AUTH0_AUDIENCE || "";
 
-// Setup app utilities
-if (typeof window !== "undefined") {
-  setupCachePersistence(queryClient);
-  setupDevConsole();
-}
+// Setup app utilities (only on client side)
+// This will be called after component mounts
 
-export const metadata = {
-  title: "Recipe App | Discover & Save Your Favourite Recipes",
-  description:
-    "A modern full-stack recipe app to search, view, and save your favourite recipes. Built with React, Node.js, PostgreSQL, and Spoonacular API.",
-  keywords:
-    "Recipe App, React, Node.js, PostgreSQL, Spoonacular, Food, Cooking, Favourites, Full Stack, Next.js, TypeScript",
-  authors: [{ name: "Arnob Mahmud" }],
-  openGraph: {
-    title: "Recipe App | Discover & Save Your Favourite Recipes",
-    description:
-      "A modern full-stack recipe app to search, view, and save your favourite recipes.",
-    images: ["/hero-image.webp"],
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Recipe App | Discover & Save Your Favourite Recipes",
-    description:
-      "A modern full-stack recipe app to search, view, and save your favourite recipes.",
-    images: ["/hero-image.webp"],
-  },
-};
+// Metadata moved to head section since this is a client component
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Setup utilities on mount (client-side only)
+  React.useEffect(() => {
+    setupCachePersistence(queryClient);
+    setupDevConsole();
+  }, []);
+
   return (
     <html lang="en">
       <head>
+        <title>Recipe App | Discover & Save Your Favourite Recipes</title>
+        <meta
+          name="description"
+          content="A modern full-stack recipe app to search, view, and save your favourite recipes. Built with React, Node.js, PostgreSQL, and Spoonacular API."
+        />
+        <meta
+          name="keywords"
+          content="Recipe App, React, Node.js, PostgreSQL, Spoonacular, Food, Cooking, Favourites, Full Stack, Next.js, TypeScript"
+        />
+        <meta name="author" content="Arnob Mahmud" />
+        <meta property="og:title" content="Recipe App | Discover & Save Your Favourite Recipes" />
+        <meta
+          property="og:description"
+          content="A modern full-stack recipe app to search, view, and save your favourite recipes."
+        />
+        <meta property="og:image" content="/hero-image.webp" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Recipe App | Discover & Save Your Favourite Recipes" />
+        <meta
+          name="twitter:description"
+          content="A modern full-stack recipe app to search, view, and save your favourite recipes."
+        />
+        <meta name="twitter:image" content="/hero-image.webp" />
         <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link
           rel="preload"
           as="image"
           href="/hero-image.webp"
-          fetchPriority="high"
         />
       </head>
       <body>
