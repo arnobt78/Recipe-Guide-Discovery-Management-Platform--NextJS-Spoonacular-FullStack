@@ -1,5 +1,5 @@
 {
-  "name": "food-app",
+  "name": "recipe-spoonacular",
   "private": true,
   "version": "2.0.1",
   "scripts": {

@@ -1,11 +1,7 @@
 module.exports = {
   root: true,
-  env: { 
-    browser: true, 
-    es2020: true,
-    node: true 
-  },
   extends: [
+    'next/core-web-vitals',
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:react-hooks/recommended',
@@ -16,6 +12,7 @@ module.exports = {
     '**/*.md',
     'node_modules',
     'prisma/migrations',
+    '.next',
     'DEVELOPMENT_RULES.md',
     'REACT_QUERY_SETUP_GUIDE.md',
     'README.md'
@@ -24,16 +21,11 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
+    ecmaFeatures: {
+      jsx: true,
+    },
   },
-  plugins: ['react-refresh'],
   rules: {
-    'react-refresh/only-export-components': [
-      'warn',
-      { 
-        allowConstantExport: true,
-        allowExportNames: ['buttonVariants', 'badgeVariants', 'useAuth', 'useRecipeContext'],
-      },
-    ],
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/no-unused-vars': [
       'warn',
@@ -42,6 +34,7 @@ module.exports = {
         varsIgnorePattern: '^_'
       }
     ],
+    'react-hooks/exhaustive-deps': 'warn',
   },
   overrides: [
     {
@@ -52,7 +45,7 @@ module.exports = {
       },
     },
     {
-      files: ['src/**/*'],
+      files: ['src/**/*', 'app/**/*'],
       env: {
         browser: true,
         node: false,
