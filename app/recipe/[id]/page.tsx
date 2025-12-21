@@ -1371,7 +1371,7 @@ const RecipePageContent = memo(() => {
                           <div className="flex-1">
                             <h3 className="text-lg sm:text-xl font-semibold text-white mb-4">Taste Profile</h3>
                             <p className="text-sm text-gray-400 mb-4">
-                              A breakdown of the recipe's taste attributes. Values are normalized on a scale of 0-100.
+                              A breakdown of the recipe&apos;s taste attributes. Values are normalized on a scale of 0-100.
                             </p>
 
                             <div className="space-y-4">

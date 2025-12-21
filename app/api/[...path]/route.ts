@@ -21,7 +21,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { handleCorsPreflight, requireAuth, jsonResponse, getCorsHeaders } from "@/lib/api-utils-nextjs";
+import { handleCorsPreflight, requireAuth, jsonResponse, getCorsHeaders } from "../../../lib/api-utils-nextjs";
 import {
   searchRecipes,
   autocompleteRecipes,
@@ -31,8 +31,8 @@ import {
   getFavouriteRecipesByIDs,
   getDishPairingForWine,
   getWinePairing,
-} from "@/lib/recipe-api";
-import { prisma } from "@/lib/prisma";
+} from "../../../lib/recipe-api";
+import { prisma } from "../../../lib/prisma";
 import { v2 as cloudinary } from "cloudinary";
 
 // Initialize Cloudinary
@@ -123,6 +123,9 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ path: string[] }> }
 ) {
+  // Performance tracking: Record start time
+  const startTime = Date.now();
+  
   // Handle CORS preflight
   const corsResponse = handleCorsPreflight(request);
   if (corsResponse) return corsResponse;
@@ -167,7 +170,11 @@ export async function GET(
         page,
         Object.keys(searchOptions).length > 0 ? searchOptions : undefined
       );
-      return jsonResponse(results);
+      
+      // Add performance header
+      const response = jsonResponse(results);
+      response.headers.set("X-Response-Time", `${Date.now() - startTime}ms`);
+      return response;
     }
 
     // Route: /api/recipes/autocomplete
@@ -516,7 +523,22 @@ export async function GET(
     console.error("API GET Error:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     const statusCode = errorMessage.includes("limit") || errorMessage.includes("402") ? 402 : 500;
-    return jsonResponse({ error: "Internal server error", message: errorMessage }, statusCode);
+    
+    // Enhanced error response with request context for debugging
+    return NextResponse.json(
+      { 
+        error: "Internal server error", 
+        message: errorMessage,
+        path: path.join("/"),
+      },
+      { 
+        status: statusCode, 
+        headers: {
+          ...getCorsHeaders(),
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+        }
+      }
+    );
   }
 }
 
@@ -841,10 +863,21 @@ export async function POST(
     return jsonResponse({ error: "Not found" }, 404);
   } catch (error) {
     console.error("API POST Error:", error);
-    return jsonResponse({
-      error: "Internal server error",
-      message: error instanceof Error ? error.message : "Unknown error",
-    }, 500);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json(
+      {
+        error: "Internal server error",
+        message: errorMessage,
+        path: path.join("/"),
+      },
+      {
+        status: 500,
+        headers: {
+          ...getCorsHeaders(),
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+        }
+      }
+    );
   }
 }
 
@@ -941,10 +974,21 @@ export async function PUT(
     return jsonResponse({ error: "Not found" }, 404);
   } catch (error) {
     console.error("API PUT Error:", error);
-    return jsonResponse({
-      error: "Internal server error",
-      message: error instanceof Error ? error.message : "Unknown error",
-    }, 500);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json(
+      {
+        error: "Internal server error",
+        message: errorMessage,
+        path: path.join("/"),
+      },
+      {
+        status: 500,
+        headers: {
+          ...getCorsHeaders(),
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+        }
+      }
+    );
   }
 }
 
@@ -1140,10 +1184,21 @@ export async function DELETE(
     return jsonResponse({ error: "Not found" }, 404);
   } catch (error) {
     console.error("API DELETE Error:", error);
-    return jsonResponse({
-      error: "Internal server error",
-      message: error instanceof Error ? error.message : "Unknown error",
-    }, 500);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json(
+      {
+        error: "Internal server error",
+        message: errorMessage,
+        path: path.join("/"),
+      },
+      {
+        status: 500,
+        headers: {
+          ...getCorsHeaders(),
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+        }
+      }
+    );
   }
 }
 

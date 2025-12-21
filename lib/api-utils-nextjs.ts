@@ -146,8 +146,24 @@ export async function requireAuth(request: NextRequest): Promise<{ userId: strin
 
 /**
  * Create JSON response with CORS headers
+ * 
+ * @param data - Response data to send
+ * @param status - HTTP status code (default: 200)
+ * @param cacheControl - Cache-Control header value (default: "no-store" for API responses)
+ * @returns NextResponse with JSON data and proper headers
  */
-export function jsonResponse(data: unknown, status: number = 200): NextResponse {
-  return NextResponse.json(data, { status, headers: getCorsHeaders() });
+export function jsonResponse(
+  data: unknown, 
+  status: number = 200,
+  cacheControl: string = "no-store, no-cache, must-revalidate"
+): NextResponse {
+  return NextResponse.json(data, { 
+    status, 
+    headers: {
+      ...getCorsHeaders(),
+      "Cache-Control": cacheControl,
+      "Content-Type": "application/json",
+    }
+  });
 }
 

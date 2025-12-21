@@ -15,7 +15,7 @@ import {
   getBestApiKey,
   markApiKeyUsed,
   handleApiLimitError,
-} from "./api-key-tracker.js";
+} from "./api-key-tracker";
 
 // Explicitly load .env.local for Vercel dev
 if (existsSync(".env.local")) {

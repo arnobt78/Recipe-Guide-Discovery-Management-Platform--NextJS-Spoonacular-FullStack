@@ -263,26 +263,26 @@ const AppContent = () => {
                             <p className="text-gray-300 text-sm sm:text-base leading-relaxed mb-4">
                               Search through thousands of delicious recipes from around the world. 
                               Find recipes by ingredients, cuisine, dietary preferences, or simply 
-                              type what you're craving!
+                              type what you&apos;re craving!
                             </p>
                             <div className="space-y-2">
                               <p className="text-sm font-semibold text-purple-300 mb-2">Try searching for:</p>
                               <ul className="space-y-1 text-sm text-gray-400">
                                 <li className="flex items-center gap-2">
                                   <span className="text-purple-400">•</span>
-                                  <span>Recipe names (e.g., "pasta", "chicken curry")</span>
+                                  <span>Recipe names (e.g., &quot;pasta&quot;, &quot;chicken curry&quot;)</span>
                                 </li>
                                 <li className="flex items-center gap-2">
                                   <span className="text-purple-400">•</span>
-                                  <span>Ingredients (e.g., "tomatoes", "chicken")</span>
+                                  <span>Ingredients (e.g., &quot;tomatoes&quot;, &quot;chicken&quot;)</span>
                                 </li>
                                 <li className="flex items-center gap-2">
                                   <span className="text-purple-400">•</span>
-                                  <span>Cuisines (e.g., "italian", "chinese", "mexican")</span>
+                                  <span>Cuisines (e.g., &quot;italian&quot;, &quot;chinese&quot;, &quot;mexican&quot;)</span>
                                 </li>
                                 <li className="flex items-center gap-2">
                                   <span className="text-purple-400">•</span>
-                                  <span>Dietary preferences (e.g., "vegan", "gluten-free")</span>
+                                  <span>Dietary preferences (e.g., &quot;vegan&quot;, &quot;gluten-free&quot;)</span>
                                 </li>
                               </ul>
                             </div>
