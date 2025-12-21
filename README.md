@@ -1,12 +1,6 @@
-# Food Recipe Spoonacular Website - React, Node.js, PostgreSQL FullStack Project
+# Food Recipe Spoonacular Frontend - React, Express.js PostgreSQL FullStack Project
 
-![Screenshot 2025-08-29 at 21 29 48](https://github.com/user-attachments/assets/07100269-526c-49d7-9045-36dd3008a1ce)
-![Screenshot 2025-08-29 at 21 30 18](https://github.com/user-attachments/assets/4eeeaa08-13cb-4d5a-9759-1097d80bf290)
-![Screenshot 2025-08-29 at 21 30 35](https://github.com/user-attachments/assets/958fe32b-4201-4bbf-957d-f577b8ae10f1)
-
----
-
-A modern, full-stack recipe management application. Search for recipes, view details, and manage favourites with a beautiful React frontend and a robust Node.js/Express backend powered by PostgreSQL and the Spoonacular API.
+A modern React + TypeScript frontend for a full-stack recipe management application. This UI lets users search for recipes, view details, and manage favourites, with a beautiful, responsive design and seamless backend integration.
 
 - **Frontend-Live-Demo:** [https://food-recipe-spoonacular.netlify.app/](https://food-recipe-spoonacular.netlify.app/)
 - **Backend-Live-Demo:** [https://recipe-app-glt5.onrender.com](https://recipe-app-glt5.onrender.com)
@@ -20,10 +14,14 @@ A modern, full-stack recipe management application. Search for recipes, view det
 - [Features & Functionality](#features--functionality)
 - [Environment Variables (.env)](#environment-variables-env)
 - [Setup & Usage](#setup--usage)
-- [API Endpoints](#api-endpoints-backend)
-- [Frontend Walkthrough](#frontend-walkthrough)
-- [Backend Walkthrough](#backend-walkthrough)
-- [Reusing & Extending](#reusing--extending)
+- [Code Walkthrough](#code-walkthrough)
+  - [App.tsx](#apptsx)
+  - [api.ts](#apits)
+  - [RecipeCard.tsx](#recipecardtsx)
+  - [RecipeModal.tsx](#recipemodaltsx)
+  - [types.ts](#typests)
+  - [App.css](#appcss)
+- [Reusing Components & Extending](#reusing-components--extending)
 - [Tech Stack & Keywords](#tech-stack--keywords)
 - [Conclusion](#conclusion)
 - [Happy Coding! 🎉](#happy-coding-)
@@ -32,123 +30,94 @@ A modern, full-stack recipe management application. Search for recipes, view det
 
 ## Project Overview
 
-This project is a full-stack web app for discovering and saving recipes. It consists of:
+This frontend is the user interface for the Recipe App. It allows users to:
 
-- **Frontend**: React + TypeScript (Vite), modern UI, responsive, easy to extend.
-- **Backend**: Node.js + Express + TypeScript, REST API, PostgreSQL (via Prisma), integrates with Spoonacular API.
-
-Users can search for recipes, view summaries, and manage their favourites. The app is modular, well-documented, and ready for learning or extension.
+- Search for recipes using keywords
+- View recipe summaries in a modal
+- Add or remove favourite recipes
+- Switch between search and favourites tabs
+- Enjoy a responsive, modern UI
 
 ---
 
 ## Project Structure
 
 ```bash
-recipe-app/
-├── recipe-app-backend/    # Backend (Node.js, Express, Prisma, PostgreSQL)
-│   ├── .env
-│   ├── package.json
-│   ├── prisma/
-│   │   └── schema.prisma
-│   └── src/
-│       ├── index.ts
-│       └── recipe-api.ts
-├── recipe-app-frontend/   # Frontend (React, Vite, TypeScript)
-│   ├── .env
-│   ├── package.json
-│   ├── public/
-│   │   ├── hero-image.webp
-│   │   └── vite.svg
-│   └── src/
-│       ├── App.tsx
-│       ├── App.css
-│       ├── api.ts
-│       ├── main.tsx
-│       ├── types.ts
-│       └── components/
-│           ├── RecipeCard.tsx
-│           └── RecipeModal.tsx
-└── README.md              # (You are here)
+recipe-app-frontend/
+├── public/
+│   ├── hero-image.webp
+│   └── vite.svg
+├── src/
+│   ├── App.tsx           # Main app logic and UI
+│   ├── App.css           # Styles
+│   ├── api.ts            # API integration
+│   ├── main.tsx          # Entry point
+│   ├── types.ts          # TypeScript types
+│   └── components/
+│       ├── RecipeCard.tsx   # Recipe card component
+│       └── RecipeModal.tsx  # Modal for recipe summary
+├── index.html
+├── package.json
+├── tsconfig.json
+└── vite.config.ts
 ```
 
 ---
 
 ## Features & Functionality
 
-- **Recipe Search**: Search recipes by keyword (Spoonacular API)
-- **Recipe Details**: View recipe summary in a modal
+- **Recipe Search**: Search recipes by keyword, paginated results
+- **Recipe Details**: View recipe summary in a modal with clickable links
 - **Favourites**: Add/remove recipes to your favourites, view in a separate tab
 - **Responsive UI**: Works on desktop and mobile
+- **Modern UX**: Animated modal, hover effects, empty state messages
 - **TypeScript**: Type safety throughout
-- **API Integration**: Connects frontend and backend seamlessly
-- **Modular Code**: Easy to extend and reuse
+- **API Integration**: Connects to backend REST API
 
 ---
 
 ## Environment Variables (.env)
 
-### Backend (`recipe-app-backend/.env`)
+Create a `.env` file in the frontend root with:
 
 ```env
-API_KEY=your_spoonacular_api_key
-DATABASE_URL=your_postgresql_connection_string
+# Backend API base URL (e.g., http://localhost:5005 or your deployed backend)
+NEXT_PUBLIC_API_URL=
 ```
 
-- **API_KEY**: Get from [Spoonacular](https://spoonacular.com/food-api)
-- **DATABASE_URL**: Get from your PostgreSQL provider (Render, Supabase, Neon, Railway, etc.)
-
-### Frontend (`recipe-app-frontend/.env`)
-
-```env
-VITE_API_URL=http://localhost:5005
-```
-
-- **VITE_API_URL**: The base URL for your backend API. Use your deployed backend URL in production.
+- **NEXT_PUBLIC_API_URL**: The base URL for your backend API. Leave empty to use relative paths (works with Next.js automatically). For production, use your deployed backend URL if needed.
 
 ---
 
 ## Setup & Usage
 
-### 1. Backend
+1. **Install dependencies:**
 
-```bash
-cd recipe-app-backend
-npm install
-# Configure .env as above
-npx prisma migrate dev --name init
-npm start
-```
+   ```bash
+   npm install
+   ```
 
-API will be available at: `http://localhost:5005/api/recipes/...`
+2. **Configure environment:**
 
-### 2. Frontend
+   - Create a `.env` file as shown above.
 
-```bash
-cd recipe-app-frontend
-npm install
-# Configure .env as above
-npm run dev
-```
+3. **Start the frontend app:**
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+   ```bash
+   npm run dev
+   ```
+
+4. **Open in browser:**
+   - Visit [http://localhost:5173](http://localhost:5173) (default Vite port)
 
 ---
 
-## API Endpoints (Backend)
+## Code Walkthrough
 
-- `GET /api/recipes/search?searchTerm=<term>&page=<page>` — Search recipes
-- `GET /api/recipes/:recipeId/summary` — Get recipe summary
-- `POST /api/recipes/favourite` — Add favourite `{ "recipeId": 12345 }`
-- `GET /api/recipes/favourite` — List favourites
-- `DELETE /api/recipes/favourite` — Remove favourite `{ "recipeId": 12345 }`
+### App.tsx
 
----
-
-## Frontend Walkthrough
-
-### Main App (`App.tsx`)
-
-- Manages state, tabs, search, favourites, and modal.
+- Main app logic: manages state, tabs, search, favourites, and modal.
+- Uses hooks (`useState`, `useEffect`, `useRef`) for state and lifecycle.
 - Handles API calls via `api.ts`.
 
 #### Example: Search Recipes
@@ -172,9 +141,12 @@ const handleSearchSubmit = async (event: FormEvent) => {
 };
 ```
 
-### API Integration (`api.ts`)
+---
+
+### api.ts
 
 - Handles all API requests to the backend.
+- Uses `fetch` and the `NEXT_PUBLIC_API_URL` environment variable (or relative paths if empty).
 
 #### Example: Add Favourite Recipe
 
@@ -193,12 +165,14 @@ export const addFavouriteRecipe = async (recipe: Recipe) => {
 };
 ```
 
-### Components
+---
 
-- **RecipeCard**: Displays a recipe card with image, title, and favourite button.
-- **RecipeModal**: Shows a modal with the recipe summary and title.
+### RecipeCard.tsx
 
-#### Example: Using RecipeCard
+- Displays a recipe card with image, title, and favourite button.
+- Handles click events for viewing details and toggling favourites.
+
+#### Example: Using RecipeCard in App.tsx
 
 ```tsx
 <RecipeCard
@@ -214,35 +188,78 @@ export const addFavouriteRecipe = async (recipe: Recipe) => {
 
 ---
 
-## Backend Walkthrough
+### RecipeModal.tsx
 
-### Main Server (`src/index.ts`)
+- Shows a modal with the recipe summary and title.
+- Fetches summary from backend on open.
+- Ensures links open in a new tab.
 
-- Sets up Express, CORS, and JSON parsing.
-- Defines all API routes for search, summary, and favourites.
+#### Example: Usage in App.tsx
 
-### Spoonacular Integration (`src/recipe-api.ts`)
-
-- Handles all external API requests.
-- Functions: `searchRecipes`, `getRecipeSummary`, `getFavouriteRecipesByIDs`.
-
-### Prisma Schema (`prisma/schema.prisma`)
-
-```prisma
-model FavouriteRecipes {
-  id       Int @id @default(autoincrement())
-  recipeId Int @unique
+```tsx
+{
+  selectedRecipe ? (
+    <RecipeModal
+      recipeId={selectedRecipe.id.toString()}
+      onClose={() => setSelectedRecipe(undefined)}
+    />
+  ) : null;
 }
 ```
 
 ---
 
-## Reusing & Extending
+### types.ts
 
-- **Frontend**: Components and API functions are modular and reusable. Add new features by following the existing structure.
-- **Backend**: Add new endpoints or models in a RESTful, modular way. Use Prisma for DB migrations.
+- TypeScript interfaces for recipe data.
 
-### Example: Add a New API Call (Frontend)
+**Example:**
+
+```typescript
+export interface Recipe {
+  id: number;
+  title: string;
+  image: string;
+  imageType: string;
+}
+```
+
+---
+
+### App.css
+
+- Styles for layout, modal, cards, buttons, and responsive design.
+- Uses CSS grid for recipe layout and media queries for responsiveness.
+
+#### Example: Modal Styles
+
+```css
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  max-height: 90vh;
+  width: 90vw;
+  max-width: 600px;
+  overflow-y: auto;
+  border-radius: 16px;
+  background: #fff;
+}
+```
+
+---
+
+## Reusing Components & Extending
+
+- **RecipeCard**: Use in any recipe grid/list. Pass `recipe`, `onClick`, `onFavouriteButtonClick`, and `isFavourite` props.
+- **RecipeModal**: Use for any modal summary/details. Pass `recipeId` and `onClose`.
+- **api.ts**: Import and use API functions in any React component.
+- **Types**: Import from `types.ts` for type safety in new components.
+- **Easy Extension**: Add new tabs, features, or endpoints by following the modular structure.
+
+### Example: Add a New API Call
 
 ```typescript
 export const getRecipeInstructions = async (recipeId: string) => {
@@ -253,14 +270,6 @@ export const getRecipeInstructions = async (recipeId: string) => {
 };
 ```
 
-### Example: Add a New Endpoint (Backend)
-
-```ts
-app.get("/api/recipes/:id/instructions", async (req, res) => {
-  // Call Spoonacular for instructions
-});
-```
-
 ---
 
 ## Tech Stack & Keywords
@@ -268,15 +277,12 @@ app.get("/api/recipes/:id/instructions", async (req, res) => {
 - **React**
 - **TypeScript**
 - **Vite**
-- **Node.js**
-- **Express**
-- **Prisma**
-- **PostgreSQL**
-- **Spoonacular API**
 - **REST API**
 - **Modular Components**
 - **Hooks**
 - **Responsive Design**
+- **CSS Grid**
+- **Frontend for Backend**
 - **API Integration**
 - **Reusable UI**
 
@@ -284,7 +290,7 @@ app.get("/api/recipes/:id/instructions", async (req, res) => {
 
 ## Conclusion
 
-This project is a modern, extensible, and user-friendly full-stack recipe app. It demonstrates best practices in React, TypeScript, API integration, backend design, and UI/UX. Use it as a learning resource, a starter for your own projects, or as a foundation for your next app.
+This frontend is a modern, extensible, and user-friendly interface for recipe discovery and management. It demonstrates best practices in React, TypeScript, API integration, and UI/UX design. Use it as a learning resource, a starter for your own projects, or as a frontend for your backend APIs.
 
 ---
 
