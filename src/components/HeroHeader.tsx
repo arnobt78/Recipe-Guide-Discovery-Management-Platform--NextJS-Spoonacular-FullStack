@@ -13,6 +13,7 @@
  */
 
 import { memo } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 
 interface HeroHeaderProps {
@@ -45,12 +46,12 @@ const HeroHeader = memo(
       >
         {/* Full-width hero image */}
         <div className="absolute inset-0">
-          <img
+          <Image
             src={imageSrc}
             alt="Delicious Recipes"
-            className="w-full h-full object-cover"
-            loading="eager"
-            decoding="async"
+            fill
+            className="object-cover"
+            priority
           />
           {/* Enhanced gradient overlay for modern look */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/90" />

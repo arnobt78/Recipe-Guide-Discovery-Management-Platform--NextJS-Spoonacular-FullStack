@@ -10,6 +10,7 @@
  */
 
 import { memo } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
@@ -58,9 +59,11 @@ const EmptyState = memo(({
             <div className="relative inline-block">
               <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-xl" />
               <div className="relative p-4 sm:p-5 md:p-6 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full">
-                <img
+                <Image
                   src={icon}
                   alt="Empty state"
+                  width={64}
+                  height={64}
                   className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 mx-auto opacity-80"
                 />
               </div>
