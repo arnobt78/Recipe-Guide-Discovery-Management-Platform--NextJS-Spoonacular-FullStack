@@ -71,6 +71,7 @@ const IngredientMatchDetails = memo(
                         src={getIngredientImageUrl(ingredient.image)}
                         alt={ingredient.name}
                         fill
+                        sizes="48px"
                         className="object-cover rounded-lg"
                       />
                     </div>

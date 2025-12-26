@@ -340,6 +340,7 @@ const RecipeDetailCard = memo(
                     src={recipe.image || "/hero-image.webp"}
                     alt={recipe.title}
                     fill
+                    sizes="(max-width: 1024px) 100vw, 33vw"
                     className="object-cover"
                     priority
                   />
@@ -1234,6 +1235,7 @@ const RecipeDetailCard = memo(
                                                                         ing.name
                                                                       }
                                                                       fill
+                                                                      sizes="24px"
                                                                       className="object-cover rounded"
                                                                     />
                                                                   </div>
@@ -1291,6 +1293,7 @@ const RecipeDetailCard = memo(
                                                                         eq.name
                                                                       }
                                                                       fill
+                                                                      sizes="24px"
                                                                       className="object-cover rounded"
                                                                     />
                                                                   </div>
@@ -1395,6 +1398,7 @@ const RecipeDetailCard = memo(
                                                     src={product.imageUrl}
                                                     alt={product.title}
                                                     fill
+                                                    sizes="(max-width: 640px) 80px, 96px"
                                                     className="object-cover"
                                                   />
                                                 </div>

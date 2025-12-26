@@ -95,6 +95,7 @@ const SimilarRecipesList = memo(
                       src={imageUrl}
                       alt={similarRecipe.title}
                       fill
+                      sizes="(max-width: 640px) 80px, 96px"
                       className="object-cover group-hover:scale-110 transition-transform duration-300"
                     />
                   </div>

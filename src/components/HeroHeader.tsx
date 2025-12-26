@@ -50,6 +50,7 @@ const HeroHeader = memo(
             src={imageSrc}
             alt="Delicious Recipes"
             fill
+            sizes="100vw"
             className="object-cover"
             priority
           />

@@ -359,6 +359,7 @@ const RecipePageContent = memo(() => {
                   src={recipeInfo?.image || recipe?.image || "/hero-image.webp"}
                   alt={recipeInfo?.title || recipe?.title || "Recipe"}
                   fill
+                  sizes="100vw"
                   className="object-cover"
                   priority
                 />
@@ -1116,6 +1117,7 @@ const RecipePageContent = memo(() => {
                                             src={`https://img.spoonacular.com/ingredients_100x100/${ingredient.image}`}
                                             alt={ingredient.name}
                                             fill
+                                            sizes="(max-width: 640px) 48px, 64px"
                                             className="object-cover"
                                           />
                                         </div>
@@ -1324,6 +1326,7 @@ const RecipePageContent = memo(() => {
                                                                   src={`https://img.spoonacular.com/ingredients_100x100/${ing.image}`}
                                                                   alt={ing.name}
                                                                   fill
+                                                                  sizes="24px"
                                                                   className="object-cover rounded"
                                                                 />
                                                               </div>
@@ -1378,6 +1381,7 @@ const RecipePageContent = memo(() => {
                                                                   src={`https://img.spoonacular.com/equipment_100x100/${eq.image}`}
                                                                   alt={eq.name}
                                                                   fill
+                                                                  sizes="24px"
                                                                   className="object-cover rounded"
                                                                 />
                                                               </div>
@@ -1491,6 +1495,7 @@ const RecipePageContent = memo(() => {
                                                 src={product.imageUrl}
                                                 alt={product.title}
                                                 fill
+                                                sizes="(max-width: 640px) 80px, 96px"
                                                 className="object-cover"
                                               />
                                             </div>

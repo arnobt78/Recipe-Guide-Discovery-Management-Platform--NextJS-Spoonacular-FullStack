@@ -179,6 +179,7 @@ const ImageUploader = memo(
                     src={preview}
                     alt="Preview"
                     fill
+                    sizes="100vw"
                     className="object-cover rounded-lg"
                   />
                   <Button
