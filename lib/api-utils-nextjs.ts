@@ -3,11 +3,13 @@
  *
  * Converted from Vercel serverless functions to Next.js Request/Response
  * - CORS headers management
- * - Auth0 JWT token validation
+ * - NextAuth session authentication
+ * - Auth0 JWT token validation (fallback)
  * - User authentication helpers
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { auth as getNextAuthSession } from "../auth";
 
 /**
  * CORS headers configuration
@@ -101,9 +103,21 @@ export async function verifyAuth0Token(token: string | undefined): Promise<AuthR
 }
 
 /**
- * Authenticate request using Auth0 JWT token or fallback to x-user-id header
+ * Authenticate request using NextAuth session, Auth0 JWT token, or fallback to x-user-id header
+ * Priority: NextAuth session > Auth0 JWT > x-user-id header
  */
 export async function authenticateRequest(request: NextRequest): Promise<AuthResult> {
+  // First, try NextAuth session (most secure and recommended)
+  try {
+    const session = await getNextAuthSession();
+    if (session?.user?.id) {
+      return { userId: session.user.id, isValid: true };
+    }
+  } catch (error) {
+    console.warn("NextAuth session check failed:", error);
+  }
+
+  // Fallback to Auth0 JWT token (for backward compatibility)
   const authHeader = request.headers.get("authorization");
   if (authHeader) {
     const jwtResult = await verifyAuth0Token(authHeader);
@@ -113,6 +127,7 @@ export async function authenticateRequest(request: NextRequest): Promise<AuthRes
     console.warn("JWT validation failed, falling back to header-based auth:", jwtResult.error);
   }
 
+  // Last resort: x-user-id header (for development/testing)
   const userId = request.headers.get("x-user-id");
   if (userId) {
     return { userId, isValid: true };

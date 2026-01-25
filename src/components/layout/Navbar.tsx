@@ -22,6 +22,7 @@ import { Button } from "../ui/button";
 import { User, LogOut, BookOpen } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { LoginDialog } from "../auth/LoginDialog";
+import { RegisterDialog } from "../auth/RegisterDialog";
 
 /**
  * Navbar Component (Memoized for performance)
@@ -33,6 +34,7 @@ const Navbar = memo(() => {
   const router = useRouter();
   const { isAuthenticated, user, logout } = useAuth();
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
+  const [isRegisterDialogOpen, setIsRegisterDialogOpen] = useState(false);
 
   return (
     <motion.nav
@@ -119,6 +121,12 @@ const Navbar = memo(() => {
                 <LoginDialog
                   open={isLoginDialogOpen}
                   onOpenChange={setIsLoginDialogOpen}
+                  onSwitchToRegister={() => setIsRegisterDialogOpen(true)}
+                />
+                <RegisterDialog
+                  open={isRegisterDialogOpen}
+                  onOpenChange={setIsRegisterDialogOpen}
+                  onSwitchToLogin={() => setIsLoginDialogOpen(true)}
                 />
               </>
             )}
