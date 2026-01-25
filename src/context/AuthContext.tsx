@@ -76,17 +76,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [userId, user]);
 
   // Store access token for API calls (from session)
+  // Note: Credentials provider doesn't provide accessToken, only OAuth does
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!isAuthenticated || !userId) return;
     
-    // Get access token from session
+    // Get access token from session (only for OAuth providers)
     const accessToken = (session?.user as { accessToken?: string })?.accessToken;
     if (accessToken) {
       try {
         localStorage.setItem("access_token", accessToken);
       } catch (error) {
         console.warn("Failed to store access token:", error);
+      }
+    } else {
+      // For Credentials provider, remove any stale access token
+      // Backend will use x-user-id header instead
+      try {
+        localStorage.removeItem("access_token");
+      } catch (error) {
+        console.warn("Failed to remove access token:", error);
       }
     }
   }, [isAuthenticated, userId, session]);

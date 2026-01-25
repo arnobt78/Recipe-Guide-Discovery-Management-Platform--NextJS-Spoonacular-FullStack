@@ -141,8 +141,15 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
           // Success - close dialog and refresh session
           toast.success("Signed in successfully!");
           onOpenChange(false);
-          router.refresh(); // Refresh to update session in UI
-          setIsLoading(false);
+          
+          // Refresh router to update session
+          router.refresh();
+          
+          // Small delay to ensure session is propagated and localStorage is updated
+          // This ensures API calls have the userId available
+          setTimeout(() => {
+            setIsLoading(false);
+          }, 100);
         }
       } catch (error) {
         console.error("Credentials sign-in error:", error);

@@ -49,18 +49,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
+        // Type assertion for credentials
+        const email = credentials.email as string;
+        const password = credentials.password as string;
+
         // Check against test accounts
         const account = Object.values(testAccounts).find(
-          (acc) => acc.email === credentials.email
+          (acc) => acc.email === email
         );
 
-        if (!account || account.password !== credentials.password) {
+        if (!account || account.password !== password) {
           return null;
         }
 
         // Return user object for test account
+        // Use consistent ID based on email (not timestamp) so same user gets same ID
         return {
-          id: credentials.email.split("@")[0] + "_" + Date.now(),
+          id: `test_${email.split("@")[0]}`,
           email: account.email,
           name: account.name,
           image: undefined,
@@ -90,15 +95,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user, account }) {
       // Initial sign in - add user info to token
       if (user) {
-        // NextAuth doesn't provide user.id by default, so we generate one from email
-        token.id = user.email?.split("@")[0] + "_" + Date.now() || `user_${Date.now()}`;
+        // Use user.id if provided (from Credentials provider), otherwise generate one
+        token.id = user.id || user.email?.split("@")[0] + "_" + Date.now() || `user_${Date.now()}`;
         token.email = user.email;
         token.name = user.name;
         token.picture = user.image;
       }
       
-      // Add access token from OAuth provider
-      if (account) {
+      // Add access token from OAuth provider (only for OAuth providers, not Credentials)
+      if (account && account.provider !== "credentials") {
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
         token.expiresAt = account.expires_at;
