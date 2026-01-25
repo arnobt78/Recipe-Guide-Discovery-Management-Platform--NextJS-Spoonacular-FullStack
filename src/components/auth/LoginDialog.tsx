@@ -1,11 +1,11 @@
 /**
  * Login Dialog Component
  *
- * Custom NextAuth login dialog with test account dropdown and Google OAuth
+ * Custom NextAuth login dialog with account dropdown helper and Google OAuth
  * Features:
  * - ShadCN UI Dialog component
- * - Test account dropdown (auto-fills email/password)
- * - Email/password authentication (Credentials provider)
+ * - Account dropdown helper (auto-fills email/password for convenience)
+ * - Email/password authentication (Credentials provider - database-backed)
  * - Google OAuth sign-in
  * - Dark theme compatible
  * - No page refresh - UI updates automatically
@@ -50,10 +50,11 @@ interface LoginDialogProps {
 }
 
 /**
- * Test account credentials
- * Matches DROPDOWN_TEST_CREDENTIALS_DOCS.md
+ * Account helper credentials (for convenience - auto-fills form fields)
+ * These are just helpers to quickly fill the form - authentication still requires
+ * the user to exist in the database with matching credentials
  */
-const testAccounts: Record<string, { email: string; password: string }> = {
+const accountHelpers: Record<string, { email: string; password: string }> = {
   "test-user": {
     email: "test@user.com",
     password: "12345678",
@@ -101,8 +102,9 @@ export function LoginDialog({
   });
 
   /**
-   * Handle test account selection from dropdown
-   * Auto-fills email and password fields
+   * Handle account helper selection from dropdown
+   * Auto-fills email and password fields for convenience
+   * Note: User must still exist in database with these credentials
    */
   const handleRoleSelect = useCallback(
     (value: string) => {
@@ -113,7 +115,7 @@ export function LoginDialog({
         reset();
       } else {
         setSelectedRole(value);
-        const account = testAccounts[value];
+        const account = accountHelpers[value];
         if (account) {
           setValue("email", account.email);
           setValue("password", account.password);
@@ -196,10 +198,10 @@ export function LoginDialog({
           onSubmit={handleSubmit(handleCredentialsSignIn)}
           className="space-y-6 mt-4"
         >
-          {/* Test Account Dropdown */}
+          {/* Account Helper Dropdown */}
           <div className="space-y-2">
             <Label htmlFor="test-account-select" className="text-white">
-              Test Accounts To Login With
+              Quick Fill (Account Helper)
             </Label>
             <Select
               key={`select-${selectedRole || "empty"}`}
@@ -210,14 +212,14 @@ export function LoginDialog({
                 id="test-account-select"
                 className="border-emerald-500/50 bg-slate-800/50 text-white focus:ring-emerald-500/50 focus:border-emerald-500 rounded-lg"
               >
-                <SelectValue placeholder="Select Role Based Test Account" />
+                <SelectValue placeholder="Select to auto-fill credentials" />
               </SelectTrigger>
               <SelectContent className="border-gray-600 bg-gray-800">
                 <SelectItem
                   value="test-user"
                   className="cursor-pointer text-white focus:bg-gray-700 focus:text-white"
                 >
-                  Test User
+                  Test User (test@user.com)
                 </SelectItem>
                 {selectedRole && (
                   <SelectItem
@@ -229,6 +231,9 @@ export function LoginDialog({
                 )}
               </SelectContent>
             </Select>
+            <p className="text-xs text-gray-500">
+              This helper auto-fills the form. User must exist in database.
+            </p>
           </div>
 
           {/* Email Input */}
