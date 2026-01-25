@@ -16,15 +16,10 @@ import Credentials from "next-auth/providers/credentials";
  * These match the test accounts defined in DROPDOWN_TEST_CREDENTIALS_DOCS.md
  */
 const testAccounts: Record<string, { email: string; password: string; name: string }> = {
-  "guest-user": {
+  "test-user": {
     email: "test@user.com",
     password: "12345678",
-    name: "Guest User",
-  },
-  "guest-admin": {
-    email: "test@admin.com",
-    password: "12345678",
-    name: "Guest Admin",
+    name: "Test User",
   },
 };
 

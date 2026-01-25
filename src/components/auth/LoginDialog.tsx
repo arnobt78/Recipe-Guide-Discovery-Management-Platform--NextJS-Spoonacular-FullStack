@@ -54,12 +54,8 @@ interface LoginDialogProps {
  * Matches DROPDOWN_TEST_CREDENTIALS_DOCS.md
  */
 const testAccounts: Record<string, { email: string; password: string }> = {
-  "guest-user": {
+  "test-user": {
     email: "test@user.com",
-    password: "12345678",
-  },
-  "guest-admin": {
-    email: "test@admin.com",
     password: "12345678",
   },
 };
@@ -218,16 +214,10 @@ export function LoginDialog({
               </SelectTrigger>
               <SelectContent className="border-gray-600 bg-gray-800">
                 <SelectItem
-                  value="guest-user"
+                  value="test-user"
                   className="cursor-pointer text-white focus:bg-gray-700 focus:text-white"
                 >
-                  Guest User
-                </SelectItem>
-                <SelectItem
-                  value="guest-admin"
-                  className="cursor-pointer text-white focus:bg-gray-700 focus:text-white"
-                >
-                  Guest Admin
+                  Test User
                 </SelectItem>
                 {selectedRole && (
                   <SelectItem

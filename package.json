@@ -11,7 +11,8 @@
     "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "scripts:delete-users": "npx tsx scripts/delete-all-users.ts"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.10.0",
