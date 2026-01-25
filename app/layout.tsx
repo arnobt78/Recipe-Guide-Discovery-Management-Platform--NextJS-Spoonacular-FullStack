@@ -5,9 +5,80 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Auth0Provider } from "@auth0/auth0-react";
 import { Toaster } from "sonner";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
+import { PostHogProvider } from "@/components/providers/PostHogProvider";
 import { setupCachePersistence } from "@/utils/queryCachePersistence";
 import { setupDevConsole } from "@/utils/devConsole";
 import "@/global.css";
+
+// Initialize Sentry client-side
+if (typeof window !== "undefined") {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  require("../sentry.client.config");
+
+  // Suppress Next.js error overlay for expected errors (ad blockers, network failures)
+  // These errors are not real application errors and shouldn't break the UI
+  const originalErrorHandler: OnErrorEventHandler | null = window.onerror;
+  const originalRejectionHandler: ((this: Window, ev: PromiseRejectionEvent) => unknown) | null = window.onunhandledrejection;
+
+  window.onerror = function(message, source, lineno, colno, error) {
+    const errorMessage = String(message || "");
+    const errorType = error?.name || "";
+    const errorStack = error?.stack || "";
+
+    // Suppress network errors from PostHog and Sentry (likely from ad blockers)
+    if (
+      errorMessage.includes("Failed to fetch") ||
+      errorMessage.includes("ERR_BLOCKED_BY_CLIENT") ||
+      errorMessage.includes("net::ERR_BLOCKED_BY_CLIENT") ||
+      errorMessage.includes("TypeError: Failed to fetch") ||
+      errorMessage.includes("PostHog") ||
+      errorMessage.includes("Sentry") ||
+      (errorType === "TypeError" && errorStack.includes("fetch")) ||
+      (errorStack && (
+        errorStack.includes("posthog") ||
+        errorStack.includes("sentry") ||
+        errorStack.includes("PostHog") ||
+        errorStack.includes("Sentry")
+      ))
+    ) {
+      // Silently suppress - return true to prevent default error handling
+      return true;
+    }
+
+    // Call original error handler for other errors
+    if (originalErrorHandler) {
+      return originalErrorHandler(message, source, lineno, colno, error);
+    }
+    return false;
+  };
+
+  window.onunhandledrejection = function(event: PromiseRejectionEvent) {
+    const errorMessage = String(event.reason?.message || event.reason || "");
+    const errorStack = String(event.reason?.stack || "");
+
+    // Suppress network errors from PostHog and Sentry (likely from ad blockers)
+    if (
+      errorMessage.includes("Failed to fetch") ||
+      errorMessage.includes("ERR_BLOCKED_BY_CLIENT") ||
+      errorMessage.includes("TypeError: Failed to fetch") ||
+      errorMessage.includes("PostHog") ||
+      errorMessage.includes("Sentry") ||
+      errorStack.includes("posthog") ||
+      errorStack.includes("sentry") ||
+      errorStack.includes("PostHog") ||
+      errorStack.includes("Sentry")
+    ) {
+      // Silently suppress - prevent default error handling
+      event.preventDefault();
+      return;
+    }
+
+    // Call original rejection handler for other errors
+    if (originalRejectionHandler) {
+      originalRejectionHandler.call(window, event);
+    }
+  };
+}
 
 /**
  * Root Layout for Next.js App
@@ -107,6 +178,7 @@ export default function RootLayout({
       </head>
       <body suppressHydrationWarning>
         <ErrorBoundary>
+          <PostHogProvider>
           <Auth0Provider
             domain={auth0Domain}
             clientId={auth0ClientId}
@@ -136,6 +208,7 @@ export default function RootLayout({
               />
             </QueryClientProvider>
           </Auth0Provider>
+          </PostHogProvider>
         </ErrorBoundary>
       </body>
     </html>

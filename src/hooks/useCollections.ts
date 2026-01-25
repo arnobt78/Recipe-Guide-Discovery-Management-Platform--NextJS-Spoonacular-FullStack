@@ -20,6 +20,7 @@ import { RecipeCollection, CollectionItem, Recipe } from "../types";
 import { toast } from "sonner";
 import { invalidateCollectionsQueries } from "../utils/queryInvalidation";
 import { useAuthCheck } from "./useAuthCheck";
+import { usePostHog } from "./usePostHog";
 
 /**
  * Hook to get all collections for authenticated user
@@ -74,12 +75,17 @@ export function useCreateCollection(): UseMutationResult<
   { name: string; description?: string; color?: string }
 > {
   const queryClient = useQueryClient();
+  const { trackCollection } = usePostHog();
 
   return useMutation({
     mutationFn: ({ name, description, color }) =>
       api.createCollection(name, description, color),
-    onSuccess: () => {
+    onSuccess: (data) => {
       invalidateCollectionsQueries(queryClient);
+      
+      // Track PostHog event
+      trackCollection("created", data.id, data.name);
+      
       toast.success("Collection created successfully!");
     },
     onError: (error: Error) => {
@@ -150,6 +156,7 @@ export function useAddRecipeToCollection(): UseMutationResult<
   { collectionId: string; recipe: Recipe; order?: number }
 > {
   const queryClient = useQueryClient();
+  const { trackCollection } = usePostHog();
 
   return useMutation({
     mutationFn: ({ collectionId, recipe, order }) =>
@@ -157,6 +164,10 @@ export function useAddRecipeToCollection(): UseMutationResult<
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["collection", variables.collectionId] });
       invalidateCollectionsQueries(queryClient);
+      
+      // Track PostHog event
+      trackCollection("recipe_added", variables.collectionId, variables.recipe.title);
+      
       toast.success("Recipe added to collection!");
     },
     onError: (error: Error) => {

@@ -607,3 +607,37 @@ export interface RecipeVideo {
   createdAt: string;
   updatedAt: string;
 }
+
+/**
+ * Contentful Blog Post interface
+ */
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt?: string;
+  content: string; // Rich text content (markdown or HTML)
+  featuredImage?: {
+    url: string;
+    title?: string;
+    description?: string;
+  };
+  author?: {
+    name: string;
+    avatar?: string;
+  };
+  category?: string;
+  tags?: string[];
+  publishedAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Blog posts list response interface
+ */
+export interface BlogPostsResponse {
+  posts: BlogPost[];
+  total: number;
+  skip: number;
+  limit: number;
+}

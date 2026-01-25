@@ -10,6 +10,7 @@
  */
 
 import { Component, ErrorInfo, ReactNode } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { AlertTriangle, RefreshCw } from "lucide-react";
@@ -47,8 +48,20 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log error to console (in production, send to error tracking service)
+    // Log error to console
     console.error("ErrorBoundary caught an error:", error, errorInfo);
+    
+    // Send error to Sentry for tracking
+    Sentry.captureException(error, {
+      contexts: {
+        react: {
+          componentStack: errorInfo.componentStack,
+        },
+      },
+      tags: {
+        errorBoundary: true,
+      },
+    });
     
     this.setState({
       error,

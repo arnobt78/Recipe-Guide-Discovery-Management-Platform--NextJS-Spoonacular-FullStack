@@ -14,12 +14,14 @@
  * Following DEVELOPMENT_RULES.md: Reusable component, optimized performance
  */
 
-import { memo } from "react";
+import { memo, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "../ui/button";
-import { User, LogOut } from "lucide-react";
+import { User, LogOut, BookOpen } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { LoginDialog } from "../auth/LoginDialog";
 
 /**
  * Navbar Component (Memoized for performance)
@@ -28,7 +30,9 @@ import { useAuth } from "../../context/AuthContext";
  * Navigation tabs are handled by TabNavigation component below hero section
  */
 const Navbar = memo(() => {
-  const { isAuthenticated, user, loginWithRedirect, logout } = useAuth();
+  const router = useRouter();
+  const { isAuthenticated, user, logout } = useAuth();
+  const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
 
   return (
     <motion.nav
@@ -51,16 +55,29 @@ const Navbar = memo(() => {
               alt="Recipe App Logo"
               width={40}
               height={40}
-              className="w-8 h-8 md:w-10 md:h-10"
+              className="w-8 h-8 md:w-10 md:h-10 cursor-pointer"
               style={{ width: "auto" }}
+              onClick={() => router.push("/")}
             />
-            <h1 className="text-xl md:text-2xl font-bold gradient-text drop-shadow-[0_0_15px_rgba(34,197,94,0.5)]">
+            <h1 
+              className="text-xl md:text-2xl font-bold gradient-text drop-shadow-[0_0_15px_rgba(34,197,94,0.5)] cursor-pointer"
+              onClick={() => router.push("/")}
+            >
               Recipe Guide
             </h1>
           </motion.div>
 
-          {/* Auth Buttons */}
+          {/* Navigation & Auth Buttons */}
           <div className="flex items-center gap-2">
+            {/* Blog Link */}
+            <Button
+              variant="ghost"
+              onClick={() => router.push("/blog")}
+              className="hidden sm:flex items-center gap-2 text-gray-300 hover:text-white hover:bg-purple-500/20 hover:shadow-md hover:shadow-purple-500/20 transition-all duration-300"
+            >
+              <BookOpen className="h-4 w-4" />
+              <span>Blog</span>
+            </Button>
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2 text-sm text-gray-300">
@@ -90,14 +107,20 @@ const Navbar = memo(() => {
                 </Button>
               </div>
             ) : (
-              <Button
-                variant="ghost"
-                onClick={() => loginWithRedirect()}
-                className="flex items-center gap-2 text-gray-300 hover:text-white hover:bg-green-500/20 hover:shadow-md hover:shadow-green-500/20 transition-all duration-300"
-              >
-                <User className="h-4 w-4" />
-                <span className="hidden sm:inline">Login</span>
-              </Button>
+              <>
+                <Button
+                  variant="ghost"
+                  onClick={() => setIsLoginDialogOpen(true)}
+                  className="flex items-center gap-2 text-gray-300 hover:text-white hover:bg-green-500/20 hover:shadow-md hover:shadow-green-500/20 transition-all duration-300"
+                >
+                  <User className="h-4 w-4" />
+                  <span className="hidden sm:inline">Login</span>
+                </Button>
+                <LoginDialog
+                  open={isLoginDialogOpen}
+                  onOpenChange={setIsLoginDialogOpen}
+                />
+              </>
             )}
           </div>
         </div>

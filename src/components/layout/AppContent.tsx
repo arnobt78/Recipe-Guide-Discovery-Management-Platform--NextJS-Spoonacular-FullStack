@@ -41,6 +41,7 @@ import {
   useAddFavouriteRecipe,
   useRemoveFavouriteRecipe,
 } from "../../hooks/useRecipes";
+import { usePostHog } from "../../hooks/usePostHog";
 import { Recipe, SearchRecipesResponse } from "../../types";
 import { toast } from "sonner";
 import { ChefHat } from "lucide-react";
@@ -88,6 +89,7 @@ const AppContent = () => {
   } = useRecipeContext();
 
   const { isAuthenticated } = useAuth();
+  const { trackSearch } = usePostHog();
 
   // Detect if query is natural language (should use AI search)
   // Natural language queries: longer than 15 chars, contain common words like "for", "with", "healthy", "quick", etc.
@@ -161,6 +163,20 @@ const AppContent = () => {
     : regularSearchResponse;
   const isSearching = shouldUseAISearch ? isAISearching : isRegularSearching;
   const searchError = shouldUseAISearch ? aiSearchError : regularSearchError;
+
+  // Track search results in PostHog when they arrive
+  useEffect(() => {
+    if (selectedTab === "search" && searchTerm.trim() && searchResponse && !isSearching) {
+      if (shouldUseAISearch && aiSearchResponse?.recipes) {
+        trackSearch(searchTerm.trim(), aiSearchResponse.recipes.length);
+      } else if (!shouldUseAISearch && (searchResponse as SearchRecipesResponse)?.totalResults) {
+        const totalResults = (searchResponse as SearchRecipesResponse).totalResults || 0;
+        if (totalResults > 0) {
+          trackSearch(searchTerm.trim(), totalResults);
+        }
+      }
+    }
+  }, [searchResponse, aiSearchResponse, searchTerm, selectedTab, shouldUseAISearch, isSearching, trackSearch]);
 
   const {
     data: favouriteRecipes = [],
@@ -298,8 +314,11 @@ const AppContent = () => {
       event.preventDefault();
       if (!searchTerm.trim()) return;
       setCurrentPage(1);
+      
+      // Track search in PostHog
+      trackSearch(searchTerm.trim());
     },
-    [searchTerm, setCurrentPage]
+    [searchTerm, setCurrentPage, trackSearch]
   );
 
   const handleViewMoreClick = useCallback(() => {

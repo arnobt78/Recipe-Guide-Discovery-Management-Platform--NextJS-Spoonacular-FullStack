@@ -25,6 +25,8 @@ import {
   FilterPreset,
   AdvancedFilterOptions,
   RecipeVideo,
+  BlogPost,
+  BlogPostsResponse,
 } from "./types";
 
 // Use relative paths for API calls - works with Next.js API routes
@@ -1941,4 +1943,77 @@ export const deleteRecipeVideo = async (videoId: string): Promise<void> => {
     );
     throw new Error(errorMessage);
   }
+};
+
+/**
+ * Get blog posts list from Contentful CMS
+ * 
+ * @param options - Query options (skip, limit, category)
+ * @returns Promise with blog posts list
+ * @throws Error if request fails
+ */
+export const getBlogPosts = async (options?: {
+  skip?: number;
+  limit?: number;
+  category?: string;
+}): Promise<BlogPostsResponse> => {
+  const params = new URLSearchParams();
+  if (options?.skip !== undefined) {
+    params.append("skip", options.skip.toString());
+  }
+  if (options?.limit !== undefined) {
+    params.append("limit", options.limit.toString());
+  }
+  if (options?.category) {
+    params.append("category", options.category);
+  }
+
+  const queryString = params.toString();
+  const apiPath = getApiUrl(`/api/cms/blog${queryString ? `?${queryString}` : ""}`);
+  const response = await fetch(apiPath, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    const errorMessage = await extractErrorMessage(
+      response,
+      `Failed to fetch blog posts. Status: ${response.status}`
+    );
+    throw new Error(errorMessage);
+  }
+
+  return response.json() as Promise<BlogPostsResponse>;
+};
+
+/**
+ * Get single blog post by slug from Contentful CMS
+ * 
+ * @param slug - Blog post slug
+ * @returns Promise with blog post
+ * @throws Error if request fails
+ */
+export const getBlogPost = async (slug: string): Promise<BlogPost> => {
+  const apiPath = getApiUrl(`/api/cms/blog/${encodeURIComponent(slug)}`);
+  const response = await fetch(apiPath, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error("Blog post not found");
+    }
+    const errorMessage = await extractErrorMessage(
+      response,
+      `Failed to fetch blog post. Status: ${response.status}`
+    );
+    throw new Error(errorMessage);
+  }
+
+  return response.json() as Promise<BlogPost>;
 };

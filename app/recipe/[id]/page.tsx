@@ -30,6 +30,7 @@ import {
   useRecipeInformation,
   useSimilarRecipes,
 } from "@/hooks/useRecipes";
+import { usePostHog } from "@/hooks/usePostHog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -116,6 +117,7 @@ const RecipePageContent = memo(() => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();
+  const { trackRecipe } = usePostHog();
   const [showAddToCollection, setShowAddToCollection] = useState(false);
 
   const id = params?.id as string;
@@ -207,6 +209,13 @@ const RecipePageContent = memo(() => {
   }, [recipeInfo]);
 
   const isFavourite = useIsFavourite(recipe, favouriteRecipes);
+
+  // Track recipe view in PostHog when recipe loads
+  useEffect(() => {
+    if (recipeInfo && recipeInfo.id && recipeInfo.title) {
+      trackRecipe("view", recipeInfo.id, recipeInfo.title);
+    }
+  }, [recipeInfo, trackRecipe]);
 
   // Handle errors
   useEffect(() => {

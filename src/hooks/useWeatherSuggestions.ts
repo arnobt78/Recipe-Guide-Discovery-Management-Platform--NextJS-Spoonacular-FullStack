@@ -13,7 +13,7 @@
  * - Result: Cache for 1 hour, then refetch once
  */
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import * as api from "../api";
 import { WeatherSuggestionsResponse } from "../types";
 

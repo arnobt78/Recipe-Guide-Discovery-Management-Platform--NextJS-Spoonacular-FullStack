@@ -45,6 +45,194 @@ import {
   presetToCloudinaryOptions,
 } from "../../../src/config/upload-presets";
 import { Recipe } from "../../../src/types";
+import { withCache, cacheKeys } from "../../../lib/redis-cache";
+import * as Sentry from "@sentry/nextjs";
+
+/**
+ * Convert Contentful Rich text document to HTML string
+ * Handles both Rich text (object) and Long text (string) formats
+ */
+function convertContentfulContentToHtml(content: unknown): string {
+  // If it's already a string, return it
+  if (typeof content === "string") {
+    return content;
+  }
+
+  // If it's not an object, return empty string
+  if (typeof content !== "object" || content === null) {
+    return "";
+  }
+
+  // Handle Contentful Rich text document structure
+  const doc = content as {
+    nodeType?: string;
+    content?: Array<{
+      nodeType?: string;
+      value?: string;
+      content?: Array<{ nodeType?: string; value?: string; content?: unknown[] }>;
+      data?: { uri?: string };
+    }>;
+    value?: string;
+  };
+
+  // If it has a content array (Rich text document), convert it
+  if (doc.content && Array.isArray(doc.content)) {
+    return doc.content
+      .map((node) => {
+        if (!node.nodeType) return "";
+
+        switch (node.nodeType) {
+          case "paragraph": {
+            const paraContent = Array.isArray(node.content)
+              ? node.content
+                  .map((n) => {
+                    if (n.nodeType === "text") {
+                      return n.value || "";
+                    }
+                    if (n.nodeType === "hyperlink" && n.data?.uri) {
+                      const linkText = Array.isArray(n.content)
+                        ? n.content
+                            .map((c) => (c.nodeType === "text" ? c.value || "" : ""))
+                            .join("")
+                        : "";
+                      return `<a href="${n.data.uri}" target="_blank" rel="noopener noreferrer">${linkText}</a>`;
+                    }
+                    return "";
+                  })
+                  .join("")
+              : "";
+            return `<p>${paraContent}</p>`;
+          }
+
+          case "heading-1": {
+            const h1Content = Array.isArray(node.content)
+              ? node.content.map((n) => (n.nodeType === "text" ? n.value || "" : "")).join("")
+              : "";
+            return `<h1>${h1Content}</h1>`;
+          }
+
+          case "heading-2": {
+            const h2Content = Array.isArray(node.content)
+              ? node.content.map((n) => (n.nodeType === "text" ? n.value || "" : "")).join("")
+              : "";
+            return `<h2>${h2Content}</h2>`;
+          }
+
+          case "heading-3": {
+            const h3Content = Array.isArray(node.content)
+              ? node.content.map((n) => (n.nodeType === "text" ? n.value || "" : "")).join("")
+              : "";
+            return `<h3>${h3Content}</h3>`;
+          }
+
+          case "heading-4": {
+            const h4Content = Array.isArray(node.content)
+              ? node.content.map((n) => (n.nodeType === "text" ? n.value || "" : "")).join("")
+              : "";
+            return `<h4>${h4Content}</h4>`;
+          }
+
+          case "heading-5": {
+            const h5Content = Array.isArray(node.content)
+              ? node.content.map((n) => (n.nodeType === "text" ? n.value || "" : "")).join("")
+              : "";
+            return `<h5>${h5Content}</h5>`;
+          }
+
+          case "heading-6": {
+            const h6Content = Array.isArray(node.content)
+              ? node.content.map((n) => (n.nodeType === "text" ? n.value || "" : "")).join("")
+              : "";
+            return `<h6>${h6Content}</h6>`;
+          }
+
+          case "unordered-list": {
+            const ulContent = Array.isArray(node.content)
+              ? node.content
+                  .map((n) => {
+                    if (n.nodeType === "list-item") {
+                      const liContent = Array.isArray(n.content)
+                        ? n.content
+                            .map((c) => {
+                              if (c.nodeType === "paragraph") {
+                                const pContent = Array.isArray(c.content)
+                                  ? c.content.map((p) => (p.nodeType === "text" ? p.value || "" : "")).join("")
+                                  : "";
+                                return pContent;
+                              }
+                              return "";
+                            })
+                            .join("")
+                        : "";
+                      return `<li>${liContent}</li>`;
+                    }
+                    return "";
+                  })
+                  .join("")
+              : "";
+            return `<ul>${ulContent}</ul>`;
+          }
+
+          case "ordered-list": {
+            const olContent = Array.isArray(node.content)
+              ? node.content
+                  .map((n) => {
+                    if (n.nodeType === "list-item") {
+                      const liContent = Array.isArray(n.content)
+                        ? n.content
+                            .map((c) => {
+                              if (c.nodeType === "paragraph") {
+                                const pContent = Array.isArray(c.content)
+                                  ? c.content.map((p) => (p.nodeType === "text" ? p.value || "" : "")).join("")
+                                  : "";
+                                return pContent;
+                              }
+                              return "";
+                            })
+                            .join("")
+                        : "";
+                      return `<li>${liContent}</li>`;
+                    }
+                    return "";
+                  })
+                  .join("")
+              : "";
+            return `<ol>${olContent}</ol>`;
+          }
+
+          case "blockquote": {
+            const quoteContent = Array.isArray(node.content)
+              ? node.content
+                  .map((n) => {
+                    if (n.nodeType === "paragraph") {
+                      const pContent = Array.isArray(n.content)
+                        ? n.content.map((c) => (c.nodeType === "text" ? c.value || "" : "")).join("")
+                        : "";
+                      return `<p>${pContent}</p>`;
+                    }
+                    return "";
+                  })
+                  .join("")
+              : "";
+            return `<blockquote>${quoteContent}</blockquote>`;
+          }
+
+          case "hr":
+            return `<hr />`;
+
+          case "text":
+            return node.value || "";
+
+          default:
+            return "";
+        }
+      })
+      .join("");
+  }
+
+  // Fallback: try to stringify if it's an object
+  return JSON.stringify(content);
+}
 
 // Initialize Cloudinary
 cloudinary.config({
@@ -261,19 +449,36 @@ export async function GET(
       const searchOptions = parseSearchOptions(searchParams);
 
       try {
-        const results = await searchRecipes(
-          searchTerm,
-          page,
-          searchOptions && Object.keys(searchOptions).length > 0
-            ? searchOptions
-            : undefined
+        // Generate cache key that includes search term, page, and all options
+        const optionsHash = searchOptions && Object.keys(searchOptions).length > 0
+          ? JSON.stringify(searchOptions).replace(/[^a-zA-Z0-9]/g, "_")
+          : "default";
+        const cacheKey = `recipe:search:${searchTerm}:${page}:${optionsHash}`;
+
+        // Use Redis caching with 30 minute TTL for search results
+        const results = await withCache(
+          cacheKey,
+          async () => {
+            return await searchRecipes(
+              searchTerm,
+              page,
+              searchOptions && Object.keys(searchOptions).length > 0
+                ? searchOptions
+                : undefined
+            );
+          },
+          30 * 60 // 30 minutes TTL
         );
 
         // Add performance header
         const response = jsonResponse(results);
         response.headers.set("X-Response-Time", `${Date.now() - startTime}ms`);
+        response.headers.set("X-Cache-Status", "hit"); // Will show if cached
         return response;
       } catch (error) {
+        // Capture error in Sentry
+        Sentry.captureException(error);
+        
         // Check if it's an API limit error
         const errorMessage =
           error instanceof Error ? error.message : String(error);
@@ -1572,10 +1777,29 @@ Return ONLY valid JSON, no other text.`;
         addTasteData: searchParams.get("addTasteData") === "true",
       };
 
-      const results = await getRecipeInformation(recipeId, options);
-      const response = jsonResponse(results);
-      response.headers.set("X-Response-Time", `${Date.now() - startTime}ms`);
-      return response;
+      // Generate cache key that includes recipe ID and options
+      const optionsKey = `${options.includeNutrition ? "n" : ""}${options.addWinePairing ? "w" : ""}${options.addTasteData ? "t" : ""}` || "default";
+      const cacheKey = `recipe:${recipeId}:info:${optionsKey}`;
+
+      try {
+        // Use Redis caching with 24 hour TTL for recipe information (rarely changes)
+        const results = await withCache(
+          cacheKey,
+          async () => {
+            return await getRecipeInformation(recipeId, options);
+          },
+          24 * 60 * 60 // 24 hours TTL
+        );
+
+        const response = jsonResponse(results);
+        response.headers.set("X-Response-Time", `${Date.now() - startTime}ms`);
+        response.headers.set("X-Cache-Status", "hit"); // Will show if cached
+        return response;
+      } catch (error) {
+        // Capture error in Sentry
+        Sentry.captureException(error);
+        throw error;
+      }
     }
 
     // Route: /api/recipes/[id]/similar
@@ -1599,10 +1823,26 @@ Return ONLY valid JSON, no other text.`;
         return jsonResponse({ error: "Number must be between 1 and 100" }, 400);
       }
 
-      const results = await getSimilarRecipes(recipeId, number);
-      const response = jsonResponse(results);
-      response.headers.set("X-Response-Time", `${Date.now() - startTime}ms`);
-      return response;
+      try {
+        // Use Redis caching with 24 hour TTL for similar recipes
+        const cacheKey = `recipe:${recipeId}:similar:${number}`;
+        const results = await withCache(
+          cacheKey,
+          async () => {
+            return await getSimilarRecipes(recipeId, number);
+          },
+          24 * 60 * 60 // 24 hours TTL
+        );
+
+        const response = jsonResponse(results);
+        response.headers.set("X-Response-Time", `${Date.now() - startTime}ms`);
+        response.headers.set("X-Cache-Status", "hit"); // Will show if cached
+        return response;
+      } catch (error) {
+        // Capture error in Sentry
+        Sentry.captureException(error);
+        throw error;
+      }
     }
 
     // Route: /api/recipes/[id]/summary
@@ -1620,10 +1860,26 @@ Return ONLY valid JSON, no other text.`;
         return jsonResponse({ error: "Invalid recipe ID" }, 400);
       }
 
-      const results = await getRecipeSummary(recipeId);
-      const response = jsonResponse(results);
-      response.headers.set("X-Response-Time", `${Date.now() - startTime}ms`);
-      return response;
+      try {
+        // Use Redis caching with 24 hour TTL for recipe summary
+        const cacheKey = cacheKeys.recipeSummary(recipeId);
+        const results = await withCache(
+          cacheKey,
+          async () => {
+            return await getRecipeSummary(recipeId);
+          },
+          24 * 60 * 60 // 24 hours TTL
+        );
+
+        const response = jsonResponse(results);
+        response.headers.set("X-Response-Time", `${Date.now() - startTime}ms`);
+        response.headers.set("X-Cache-Status", "hit"); // Will show if cached
+        return response;
+      } catch (error) {
+        // Capture error in Sentry
+        Sentry.captureException(error);
+        throw error;
+      }
     }
 
     // Route: /api/recipes/images (GET)
@@ -2489,6 +2745,239 @@ Return ONLY a JSON array of search query strings, like: ["soup", "stew", "curry"
       }
     }
 
+    // Route: /api/cms/blog (GET) - Get blog posts list from Contentful
+    if (
+      path[0] === "cms" &&
+      path[1] === "blog" &&
+      path.length === 2
+    ) {
+      const spaceId = process.env.CMS_SPACE_ID;
+      const environment = process.env.CMS_ENVIRONMENT || "master";
+      const deliveryToken = process.env.CMS_DELIVERY_TOKEN;
+
+      if (!spaceId || !deliveryToken) {
+        return jsonResponse(
+          { error: "Contentful CMS not configured" },
+          500
+        );
+      }
+
+      const { searchParams } = new URL(request.url);
+      const skip = parseInt(searchParams.get("skip") || "0", 10);
+      const limit = parseInt(searchParams.get("limit") || "10", 10);
+      const category = searchParams.get("category");
+
+      try {
+        // Build Contentful API query - include assets for featured images
+        let queryString = `content_type=blogPost&order=-sys.createdAt&skip=${skip}&limit=${limit}&include=2`;
+        if (category) {
+          queryString += `&fields.category=${encodeURIComponent(category)}`;
+        }
+
+        const contentfulUrl = `https://cdn.contentful.com/spaces/${spaceId}/environments/${environment}/entries?${queryString}`;
+        
+        const contentfulResponse = await fetch(contentfulUrl, {
+          headers: {
+            Authorization: `Bearer ${deliveryToken}`,
+          },
+        });
+
+        if (!contentfulResponse.ok) {
+          const errorData = await contentfulResponse.json().catch(() => ({}));
+          return jsonResponse(
+            { error: errorData.message || "Failed to fetch blog posts" },
+            contentfulResponse.status
+          );
+        }
+
+        const contentfulData = await contentfulResponse.json();
+
+        // Transform Contentful entries to BlogPost format
+        const posts = (contentfulData.items || []).map((item: {
+          sys: { id: string; createdAt: string; updatedAt: string };
+          fields: Record<string, unknown>;
+        }) => {
+          const fields = item.fields || {};
+          const sys = item.sys || {};
+          
+          // Get asset URLs if included
+          let featuredImageUrl: string | undefined;
+          if (contentfulData.includes?.Asset && fields.featuredImage) {
+            const assetId = typeof fields.featuredImage === "object" && 
+              fields.featuredImage !== null &&
+              "sys" in fields.featuredImage
+              ? (fields.featuredImage.sys as { id: string }).id
+              : null;
+            
+            if (assetId) {
+              const asset = contentfulData.includes.Asset.find(
+                (a: { sys: { id: string } }) => a.sys.id === assetId
+              );
+              if (asset?.fields?.file) {
+                const file = asset.fields.file as { url: string };
+                featuredImageUrl = file.url.startsWith("//") 
+                  ? `https:${file.url}` 
+                  : file.url;
+              }
+            }
+          }
+
+          return {
+            id: sys.id,
+            title: (fields.title as string) || "",
+            slug: (fields.slug as string) || "",
+            excerpt: (fields.excerpt as string) || undefined,
+            content: convertContentfulContentToHtml(fields.content),
+            featuredImage: featuredImageUrl ? {
+              url: featuredImageUrl,
+              title: (fields.featuredImageTitle as string) || undefined,
+              description: (fields.featuredImageDescription as string) || undefined,
+            } : undefined,
+            author: fields.author ? {
+              name: (typeof fields.author === "object" && fields.author !== null && "name" in fields.author
+                ? (fields.author.name as string)
+                : String(fields.author)) || "Unknown",
+              avatar: (typeof fields.author === "object" && fields.author !== null && "avatar" in fields.author
+                ? (fields.author.avatar as string)
+                : undefined),
+            } : undefined,
+            category: (fields.category as string) || undefined,
+            tags: Array.isArray(fields.tags) ? fields.tags as string[] : undefined,
+            publishedAt: sys.createdAt || new Date().toISOString(),
+            updatedAt: sys.updatedAt || new Date().toISOString(),
+          };
+        });
+
+        return jsonResponse({
+          posts,
+          total: contentfulData.total || posts.length,
+          skip,
+          limit,
+        });
+      } catch (error) {
+        console.error("Get blog posts error:", error);
+        return jsonResponse(
+          {
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to fetch blog posts",
+          },
+          500
+        );
+      }
+    }
+
+    // Route: /api/cms/blog/[slug] (GET) - Get single blog post by slug
+    if (
+      path[0] === "cms" &&
+      path[1] === "blog" &&
+      path[2] &&
+      path.length === 3
+    ) {
+      const spaceId = process.env.CMS_SPACE_ID;
+      const environment = process.env.CMS_ENVIRONMENT || "master";
+      const deliveryToken = process.env.CMS_DELIVERY_TOKEN;
+
+      if (!spaceId || !deliveryToken) {
+        return jsonResponse(
+          { error: "Contentful CMS not configured" },
+          500
+        );
+      }
+
+      const slug = path[2];
+
+      try {
+        const contentfulUrl = `https://cdn.contentful.com/spaces/${spaceId}/environments/${environment}/entries?content_type=blogPost&fields.slug=${encodeURIComponent(slug)}&limit=1&include=2`;
+        
+        const contentfulResponse = await fetch(contentfulUrl, {
+          headers: {
+            Authorization: `Bearer ${deliveryToken}`,
+          },
+        });
+
+        if (!contentfulResponse.ok) {
+          const errorData = await contentfulResponse.json().catch(() => ({}));
+          return jsonResponse(
+            { error: errorData.message || "Failed to fetch blog post" },
+            contentfulResponse.status
+          );
+        }
+
+        const contentfulData = await contentfulResponse.json();
+        const items = contentfulData.items || [];
+
+        if (items.length === 0) {
+          return jsonResponse({ error: "Blog post not found" }, 404);
+        }
+
+        const item = items[0];
+        const fields = item.fields || {};
+        const sys = item.sys || {};
+
+        // Get asset URLs if included
+        let featuredImageUrl: string | undefined;
+        if (contentfulData.includes?.Asset && fields.featuredImage) {
+          const assetId = typeof fields.featuredImage === "object" && 
+            fields.featuredImage !== null &&
+            "sys" in fields.featuredImage
+            ? (fields.featuredImage.sys as { id: string }).id
+            : null;
+          
+          if (assetId) {
+            const asset = contentfulData.includes.Asset.find(
+              (a: { sys: { id: string } }) => a.sys.id === assetId
+            );
+            if (asset?.fields?.file) {
+              const file = asset.fields.file as { url: string };
+              featuredImageUrl = file.url.startsWith("//") 
+                ? `https:${file.url}` 
+                : file.url;
+            }
+          }
+        }
+
+        const post = {
+          id: sys.id,
+          title: (fields.title as string) || "",
+          slug: (fields.slug as string) || "",
+          excerpt: (fields.excerpt as string) || undefined,
+          content: convertContentfulContentToHtml(fields.content),
+          featuredImage: featuredImageUrl ? {
+            url: featuredImageUrl,
+            title: (fields.featuredImageTitle as string) || undefined,
+            description: (fields.featuredImageDescription as string) || undefined,
+          } : undefined,
+          author: fields.author ? {
+            name: (typeof fields.author === "object" && fields.author !== null && "name" in fields.author
+              ? (fields.author.name as string)
+              : String(fields.author)) || "Unknown",
+            avatar: (typeof fields.author === "object" && fields.author !== null && "avatar" in fields.author
+              ? (fields.author.avatar as string)
+              : undefined),
+          } : undefined,
+          category: (fields.category as string) || undefined,
+          tags: Array.isArray(fields.tags) ? fields.tags as string[] : undefined,
+          publishedAt: sys.createdAt || new Date().toISOString(),
+          updatedAt: sys.updatedAt || new Date().toISOString(),
+        };
+
+        return jsonResponse(post);
+      } catch (error) {
+        console.error("Get blog post error:", error);
+        return jsonResponse(
+          {
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to fetch blog post",
+          },
+          500
+        );
+      }
+    }
+
     // Not found
     return jsonResponse({ error: "Not found" }, 404);
   } catch (error) {
@@ -2499,6 +2988,26 @@ Return ONLY a JSON array of search query strings, like: ["soup", "stew", "curry"
       errorMessage.includes("limit") || errorMessage.includes("402")
         ? 402
         : 500;
+
+    // Send error to Sentry (only for server errors, not API limit errors)
+    if (statusCode === 500 && typeof window === "undefined") {
+      try {
+        const { captureException } = await import("@sentry/nextjs");
+        captureException(error, {
+          tags: {
+            api_route: path.join("/"),
+            method: "GET",
+          },
+          extra: {
+            path: path.join("/"),
+            errorMessage,
+          },
+        });
+      } catch (sentryError) {
+        // Silently fail if Sentry is not configured
+        console.warn("Failed to send error to Sentry:", sentryError);
+      }
+    }
 
     // Enhanced error response with request context for debugging
     return NextResponse.json(

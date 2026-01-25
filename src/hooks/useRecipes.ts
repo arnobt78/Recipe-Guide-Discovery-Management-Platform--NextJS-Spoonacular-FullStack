@@ -26,6 +26,7 @@ import {
 import { isCacheOnlyMode } from "../utils/devMode";
 import { shouldUseMockData, getMockSearchResults } from "../utils/mockData";
 import { useAuthCheck } from "./useAuthCheck";
+import { usePostHog } from "./usePostHog";
 
 /**
  * Hook to search recipes
@@ -280,14 +281,19 @@ export function useSimilarRecipes(
  */
 export function useAddFavouriteRecipe(): UseMutationResult<void, Error, Recipe> {
   const queryClient = useQueryClient();
+  const { trackRecipe } = usePostHog();
 
   return useMutation<void, Error, Recipe>({
     mutationFn: (recipe: Recipe) => api.addFavouriteRecipe(recipe),
-    onSuccess: () => {
+    onSuccess: (_, recipe) => {
       // CRITICAL: Invalidate favourites query to refetch
       // This triggers refetch of favourites query
       // UI updates immediately without page refresh
       invalidateFavouritesQueries(queryClient);
+      
+      // Track PostHog event
+      trackRecipe("favourite_added", recipe.id, recipe.title);
+      
       toast.success("Recipe added to favourites!");
     },
     onError: (error: Error) => {
@@ -318,14 +324,19 @@ export function useAddFavouriteRecipe(): UseMutationResult<void, Error, Recipe> 
  */
 export function useRemoveFavouriteRecipe(): UseMutationResult<void, Error, Recipe> {
   const queryClient = useQueryClient();
+  const { trackRecipe } = usePostHog();
 
   return useMutation<void, Error, Recipe>({
     mutationFn: (recipe: Recipe) => api.removeFavouriteRecipe(recipe),
-    onSuccess: () => {
+    onSuccess: (_, recipe) => {
       // CRITICAL: Invalidate favourites query to refetch
       // This triggers refetch of favourites query
       // UI updates immediately without page refresh
       invalidateFavouritesQueries(queryClient);
+      
+      // Track PostHog event
+      trackRecipe("favourite_removed", recipe.id, recipe.title);
+      
       toast.success("Recipe removed from favourites!");
     },
     onError: (error: Error) => {
