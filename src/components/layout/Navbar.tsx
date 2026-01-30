@@ -31,7 +31,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { User, LogOut, BookOpen, Heart, FolderOpen, Calendar, ShoppingCart } from "lucide-react";
+import {
+  User,
+  LogOut,
+  BookOpen,
+  Heart,
+  FolderOpen,
+  Calendar,
+  ShoppingCart,
+} from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useRecipeContext } from "../../context/RecipeContext";
 import { LoginDialog } from "../auth/LoginDialog";
@@ -57,12 +65,12 @@ const Navbar = memo(() => {
   const [avatarError, setAvatarError] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [mounted, setMounted] = useState(false);
-  
+
   // Track if user was authenticated (persisted in localStorage for page refresh)
   // This prevents flicker by showing skeleton instead of Login during session loading
   // Initialize to false for SSR consistency - will be updated after mount
   const [wasAuthenticated, setWasAuthenticated] = useState(false);
-  
+
   // Track previous auth state to show welcome/goodbye messages
   const prevAuthRef = useRef<boolean | null>(null);
   const prevUserNameRef = useRef<string | null>(null);
@@ -79,9 +87,9 @@ const Navbar = memo(() => {
   useEffect(() => {
     // Only run after mounted to avoid SSR issues
     if (!mounted) return;
-    
+
     const oauthPending = localStorage.getItem(OAUTH_PENDING_KEY) === "true";
-    
+
     if (isAuthenticated) {
       // Login successful - set auth flag and clear OAuth pending
       localStorage.setItem(AUTH_STATE_KEY, "true");
@@ -113,13 +121,15 @@ const Navbar = memo(() => {
 
     // User just logged in
     if (!prevAuthRef.current && isAuthenticated && user) {
-      const firstName = user.name?.split(' ')[0] || 'Chef';
+      const firstName = user.name?.split(" ")[0] || "Chef";
       toast.success(
         <div className="flex items-center gap-2">
           <span className="text-2xl">👋</span>
           <div>
             <p className="font-semibold">Welcome back, {firstName}!</p>
-            <p className="text-sm text-gray-500">Let&apos;s cook something amazing together!</p>
+            <p className="text-sm text-gray-500">
+              Let&apos;s cook something amazing together!
+            </p>
           </div>
         </div>,
         { duration: 4000 }
@@ -129,13 +139,15 @@ const Navbar = memo(() => {
 
     // User just logged out
     if (prevAuthRef.current && !isAuthenticated && isLoggingOut) {
-      const firstName = prevUserNameRef.current?.split(' ')[0] || 'Chef';
+      const firstName = prevUserNameRef.current?.split(" ")[0] || "Chef";
       toast.success(
         <div className="flex items-center gap-2">
           <span className="text-2xl">👋</span>
           <div>
             <p className="font-semibold">Goodbye, {firstName}!</p>
-            <p className="text-sm text-gray-500">We&apos;ll cook together again soon!</p>
+            <p className="text-sm text-gray-500">
+              We&apos;ll cook together again soon!
+            </p>
           </div>
         </div>,
         { duration: 4000 }
@@ -160,20 +172,26 @@ const Navbar = memo(() => {
   const getAvatarUrl = () => {
     // If avatar failed to load, use RoboHash
     if (avatarError) {
-      return `https://robohash.org/${user?.name || user?.email || "user"}.png?size=80x80`;
+      return `https://robohash.org/${
+        user?.name || user?.email || "user"
+      }.png?size=80x80`;
     }
     // Check for user image from OAuth (Google)
     if (user?.image && user.image.trim() !== "") {
       return user.image;
     }
     // Fallback to RoboHash for email/password users
-    return `https://robohash.org/${user?.name || user?.email || "user"}.png?size=80x80`;
+    return `https://robohash.org/${
+      user?.name || user?.email || "user"
+    }.png?size=80x80`;
   };
 
   /**
    * Handle menu item click - navigate to tab
    */
-  const handleMenuItemClick = (tab: "favourites" | "collections" | "meal-plan" | "shopping") => {
+  const handleMenuItemClick = (
+    tab: "favourites" | "collections" | "meal-plan" | "shopping"
+  ) => {
     setSelectedTab(tab);
     router.push("/");
   };
@@ -201,7 +219,7 @@ const Navbar = memo(() => {
       transition={{ duration: 0.3 }}
       className="sticky top-0 z-40 w-full border-b border-green-500/20 bg-slate-900/80 backdrop-blur-md shadow-lg shadow-green-500/10"
     >
-      <div className="w-full max-w-7xl mx-auto px-2 xl:px-0">
+      <div className="max-w-9xl mx-auto px-2 sm:px-4 md:px-6 xl:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <motion.div
@@ -219,7 +237,7 @@ const Navbar = memo(() => {
               style={{ width: "auto" }}
               onClick={() => router.push("/")}
             />
-            <h1 
+            <h1
               className="text-xl md:text-2xl font-bold gradient-text drop-shadow-[0_0_15px_rgba(34,197,94,0.5)] cursor-pointer"
               onClick={() => router.push("/")}
             >

@@ -22,7 +22,7 @@ export default function BlogPostPage() {
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
           <Navbar />
           <HeroHeader />
-          <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-4xl">
+          <main className="max-w-9xl mx-auto px-2 sm:px-4 md:px-6 xl:px-8 py-8">
             {slug && <BlogPostDetail slug={slug} />}
           </main>
         </div>

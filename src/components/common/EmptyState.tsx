@@ -50,7 +50,7 @@ const EmptyState = memo(
       >
         <Card
           className={`glow-card border-purple-500/30 ${
-            fullWidth ? "w-full" : "max-w-7xl w-full"
+            fullWidth ? "w-full" : "max-w-9xl w-full"
           } bg-gradient-to-br from-slate-800/50 to-purple-900/30`}
         >
           <CardContent className="p-4 sm:p-6 md:p-8 text-center">

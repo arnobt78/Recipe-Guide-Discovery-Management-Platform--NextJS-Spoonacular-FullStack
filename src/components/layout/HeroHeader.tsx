@@ -12,7 +12,7 @@
  * Following DEVELOPMENT_RULES.md: Memoized component, optimized performance
  */
 
-import { memo } from "react";
+import { memo, ReactNode } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 
@@ -22,6 +22,7 @@ interface HeroHeaderProps {
   imageSrc?: string;
   icons?: string[];
   className?: string;
+  children?: ReactNode;
 }
 
 /**
@@ -36,13 +37,21 @@ const HeroHeader = memo(
     subtitle,
     imageSrc = "/hero-image.webp",
     className = "",
+    children,
   }: HeroHeaderProps) => {
+    // Determine if we need extra height for children (search section)
+    const hasChildren = !!children;
+
     return (
       <motion.section
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className={`relative w-full h-[50vh] min-h-[400px] max-h-[600px] overflow-hidden ${className}`}
+        className={`relative w-full ${
+          hasChildren
+            ? "min-h-[500px] sm:min-h-[550px]"
+            : "h-[50vh] min-h-[400px] max-h-[600px]"
+        } overflow-hidden ${className}`}
       >
         {/* Full-width hero image */}
         <div className="absolute inset-0">
@@ -106,8 +115,8 @@ const HeroHeader = memo(
         </div>
 
         {/* Content overlay */}
-        <div className="relative z-10 h-full flex items-center justify-center">
-          <div className="text-center px-2 xl:px-0 max-w-7xl mx-auto">
+        <div className="relative z-10 h-full flex flex-col items-center justify-center py-8">
+          <div className="text-center px-2 sm:px-4 md:px-6 xl:px-8 max-w-9xl mx-auto">
             {/* Innovative subtitle with modern typography */}
             {subtitle && (
               <motion.div
@@ -118,7 +127,7 @@ const HeroHeader = memo(
               >
                 {/* Main subtitle with gradient text effect */}
                 <motion.h2
-                  className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black tracking-tight mb-6"
+                  className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black tracking-tight mb-4 sm:mb-6"
                   style={{
                     background:
                       "linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #8b5cf6 100%)",
@@ -182,6 +191,9 @@ const HeroHeader = memo(
                 </div>
               </motion.div>
             )}
+
+            {/* Children (Search Section) */}
+            {children && <div className="mt-6 sm:mt-8 w-full">{children}</div>}
           </div>
         </div>
 

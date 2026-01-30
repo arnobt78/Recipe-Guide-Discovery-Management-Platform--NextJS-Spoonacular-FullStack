@@ -31,6 +31,49 @@
   * {
     border-color: hsl(var(--border));
   }
+  
+  /* Overlay scrollbar - floats on top of content, no layout shift */
+  html {
+    overflow-y: auto;
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: rgba(139, 92, 246, 0.4) transparent; /* Firefox: thumb track */
+  }
+  
+  /* Use overlay scrollbar where supported (Chrome, Edge, Safari) */
+  @supports (overflow-y: overlay) {
+    html {
+      overflow-y: overlay;
+    }
+  }
+  
+  /* Webkit browsers - thin overlay scrollbar */
+  html::-webkit-scrollbar {
+    width: 8px;
+    background: transparent;
+  }
+  
+  html::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  html::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.4);
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  
+  html::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 92, 246, 0.6);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  
+  /* Hide scrollbar when not scrolling (appears on hover/scroll) */
+  html::-webkit-scrollbar-thumb {
+    transition: background 0.2s ease;
+  }
+  
   body {
     @apply bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-foreground;
     @apply min-h-screen;

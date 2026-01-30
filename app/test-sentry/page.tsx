@@ -1,6 +1,6 @@
 /**
  * Test Sentry Error Tracking Page
- * 
+ *
  * This page helps you test if Sentry is working correctly
  * DO NOT use in production - remove this file after testing
  */
@@ -24,8 +24,9 @@ export default function TestSentryPage() {
       // Check if PostHog is loaded (using has_opted_in_capturing or __loaded)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const posthogAny = posthog as any;
-      const isLoaded = posthogAny.__loaded || posthogAny.has_opted_in_capturing !== undefined;
-      
+      const isLoaded =
+        posthogAny.__loaded || posthogAny.has_opted_in_capturing !== undefined;
+
       if (isLoaded) {
         setPostHogStatus("✅ PostHog is loaded and ready");
       } else {
@@ -33,12 +34,16 @@ export default function TestSentryPage() {
         // Check again after a delay
         setTimeout(() => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const stillLoaded = posthogAny.__loaded || posthogAny.has_opted_in_capturing !== undefined;
+          const stillLoaded =
+            posthogAny.__loaded ||
+            posthogAny.has_opted_in_capturing !== undefined;
           if (stillLoaded) {
             setPostHogStatus("✅ PostHog is loaded and ready");
           } else {
             // Check for API errors in console
-            setPostHogStatus("❌ PostHog failed to load. Check console for 401 errors. Get Project API Key from Settings → Project Settings");
+            setPostHogStatus(
+              "❌ PostHog failed to load. Check console for 401 errors. Get Project API Key from Settings → Project Settings"
+            );
           }
         }, 2000);
       }
@@ -55,7 +60,9 @@ export default function TestSentryPage() {
       throw new Error("This is a test error for Sentry!");
     } catch (error) {
       Sentry.captureException(error);
-      setTestResult("✅ Exception sent to Sentry! Check your Sentry dashboard.");
+      setTestResult(
+        "✅ Exception sent to Sentry! Check your Sentry dashboard."
+      );
     }
   };
 
@@ -98,9 +105,15 @@ export default function TestSentryPage() {
         page: "test-sentry",
         timestamp: new Date().toISOString(),
       });
-      setTestResult("✅ PostHog event sent! Check your PostHog dashboard (Events > Activity).");
+      setTestResult(
+        "✅ PostHog event sent! Check your PostHog dashboard (Events > Activity)."
+      );
     } catch (error) {
-      setTestResult(`❌ PostHog error: ${error instanceof Error ? error.message : "Unknown error"}`);
+      setTestResult(
+        `❌ PostHog error: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     }
   };
 
@@ -116,9 +129,15 @@ export default function TestSentryPage() {
       trackEvent("user_identified", {
         source: "test-page",
       });
-      setTestResult("✅ PostHog user identified! Check your PostHog dashboard (Persons > test-user-123).");
+      setTestResult(
+        "✅ PostHog user identified! Check your PostHog dashboard (Persons > test-user-123)."
+      );
     } catch (error) {
-      setTestResult(`❌ PostHog error: ${error instanceof Error ? error.message : "Unknown error"}`);
+      setTestResult(
+        `❌ PostHog error: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     }
   };
 
@@ -130,27 +149,38 @@ export default function TestSentryPage() {
       setTestResult("⏳ Testing Redis connection...");
       const response = await fetch("/api/test/redis");
       const data = await response.json();
-      
+
       if (data.success) {
-        setTestResult("✅ Redis is working! All operations successful. Check terminal for details.");
+        setTestResult(
+          "✅ Redis is working! All operations successful. Check terminal for details."
+        );
         console.log("Redis Test Results:", data.results);
       } else {
-        setTestResult(`❌ Redis test failed: ${data.message}. Check console for details.`);
+        setTestResult(
+          `❌ Redis test failed: ${data.message}. Check console for details.`
+        );
         console.error("Redis Test Error:", data);
       }
     } catch (error) {
-      setTestResult(`❌ Redis test error: ${error instanceof Error ? error.message : "Unknown error"}`);
+      setTestResult(
+        `❌ Redis test error: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
-      <div className="container mx-auto max-w-2xl">
+      <div className="max-w-9xl mx-auto px-2 sm:px-4 md:px-6 xl:px-8 py-8">
         <Card className="glow-card">
           <CardHeader>
-            <CardTitle className="text-2xl">Testing: Sentry, PostHog & Redis</CardTitle>
+            <CardTitle className="text-2xl">
+              Testing: Sentry, PostHog & Redis
+            </CardTitle>
             <p className="text-gray-400 text-sm mt-2">
-              Use these buttons to test Sentry and PostHog integration. Check your dashboards after each test.
+              Use these buttons to test Sentry and PostHog integration. Check
+              your dashboards after each test.
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -175,18 +205,34 @@ export default function TestSentryPage() {
             <div>
               <h3 className="text-lg font-semibold mb-3">PostHog Tests</h3>
               {postHogStatus && (
-                <div className="mb-3 p-2 text-sm rounded" style={{
-                  backgroundColor: postHogStatus.includes("✅") ? "rgba(34, 197, 94, 0.1)" : 
-                                   postHogStatus.includes("❌") ? "rgba(239, 68, 68, 0.1)" : "rgba(251, 191, 36, 0.1)",
-                  border: `1px solid ${postHogStatus.includes("✅") ? "rgba(34, 197, 94, 0.3)" : 
-                                  postHogStatus.includes("❌") ? "rgba(239, 68, 68, 0.3)" : "rgba(251, 191, 36, 0.3)"}`,
-                  color: postHogStatus.includes("✅") ? "#4ade80" : 
-                         postHogStatus.includes("❌") ? "#f87171" : "#fbbf24",
-                }}>
+                <div
+                  className="mb-3 p-2 text-sm rounded"
+                  style={{
+                    backgroundColor: postHogStatus.includes("✅")
+                      ? "rgba(34, 197, 94, 0.1)"
+                      : postHogStatus.includes("❌")
+                      ? "rgba(239, 68, 68, 0.1)"
+                      : "rgba(251, 191, 36, 0.1)",
+                    border: `1px solid ${
+                      postHogStatus.includes("✅")
+                        ? "rgba(34, 197, 94, 0.3)"
+                        : postHogStatus.includes("❌")
+                        ? "rgba(239, 68, 68, 0.3)"
+                        : "rgba(251, 191, 36, 0.3)"
+                    }`,
+                    color: postHogStatus.includes("✅")
+                      ? "#4ade80"
+                      : postHogStatus.includes("❌")
+                      ? "#f87171"
+                      : "#fbbf24",
+                  }}
+                >
                   {postHogStatus}
                   {postHogStatus.includes("401") && (
                     <div className="mt-2 text-xs">
-                      <strong>Fix:</strong> Get your Project API Key from PostHog → Settings → Project Settings (not Personal API keys)
+                      <strong>Fix:</strong> Get your Project API Key from
+                      PostHog → Settings → Project Settings (not Personal API
+                      keys)
                     </div>
                   )}
                 </div>
@@ -218,8 +264,9 @@ export default function TestSentryPage() {
 
             <div className="mt-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
               <p className="text-yellow-400 text-sm">
-                ⚠️ <strong>Important:</strong> After testing, delete this file (<code>app/test-sentry/page.tsx</code>) 
-                to prevent accidental error triggers in production.
+                ⚠️ <strong>Important:</strong> After testing, delete this file (
+                <code>app/test-sentry/page.tsx</code>) to prevent accidental
+                error triggers in production.
               </p>
             </div>
           </CardContent>
