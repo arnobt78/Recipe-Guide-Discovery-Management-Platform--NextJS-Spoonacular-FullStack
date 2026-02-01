@@ -37,7 +37,7 @@ const RecipeGrid = memo(({
   showRemoveFromCollection = false,
 }: RecipeGridProps) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
       <AnimatePresence>
         {recipes.map((recipe, index) => {
           const isFavourite = favouriteRecipes.some(
@@ -51,6 +51,7 @@ const RecipeGrid = memo(({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ delay: index * 0.05 }}
+              className="h-full"
             >
               <RecipeCard
                 recipe={recipe}

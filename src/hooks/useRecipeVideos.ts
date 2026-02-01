@@ -20,6 +20,7 @@ import * as api from "../api";
 import { RecipeVideo } from "../types";
 import { toast } from "sonner";
 import { useAuthCheck } from "./useAuthCheck";
+import { invalidateBusinessInsights } from "../utils/queryInvalidation";
 
 /**
  * Hook to get all videos for a recipe
@@ -81,6 +82,7 @@ export function useAddRecipeVideo(): UseMutationResult<
     onSuccess: (_, variables) => {
       // Invalidate videos list for this recipe
       queryClient.invalidateQueries({ queryKey: ["recipes", "videos", variables.recipeId] });
+      invalidateBusinessInsights(queryClient);
       toast.success("Video added successfully");
     },
     onError: (error: Error) => {
@@ -104,6 +106,7 @@ export function useRemoveRecipeVideo(): UseMutationResult<void, Error, { videoId
     onSuccess: (_, variables) => {
       // Invalidate videos list for this recipe
       queryClient.invalidateQueries({ queryKey: ["recipes", "videos", variables.recipeId] });
+      invalidateBusinessInsights(queryClient);
       toast.success("Video deleted successfully");
     },
     onError: (error: Error) => {

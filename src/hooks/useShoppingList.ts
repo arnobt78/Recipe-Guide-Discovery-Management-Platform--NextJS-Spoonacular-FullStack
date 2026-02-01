@@ -19,6 +19,7 @@ import * as api from "../api";
 import { ShoppingList, ShoppingListItem } from "../types";
 import { toast } from "sonner";
 import { useAuthCheck } from "./useAuthCheck";
+import { invalidateBusinessInsights } from "../utils/queryInvalidation";
 
 /**
  * Hook to get all shopping lists for authenticated user
@@ -60,6 +61,7 @@ export function useCreateShoppingList(): UseMutationResult<
     mutationFn: (data) => api.createShoppingList(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["shopping-lists"] });
+      invalidateBusinessInsights(queryClient);
       toast.success("Shopping list created successfully!");
     },
     onError: (error: Error) => {
@@ -96,6 +98,7 @@ export function useUpdateShoppingList(): UseMutationResult<
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["shopping-lists"] });
       queryClient.invalidateQueries({ queryKey: ["shopping-list", data.id] });
+      invalidateBusinessInsights(queryClient);
       toast.success("Shopping list updated successfully!");
     },
     onError: (error: Error) => {
@@ -117,6 +120,7 @@ export function useDeleteShoppingList(): UseMutationResult<void, Error, string> 
     mutationFn: (id: string) => api.deleteShoppingList(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["shopping-lists"] });
+      invalidateBusinessInsights(queryClient);
       toast.success("Shopping list deleted successfully!");
     },
     onError: (error: Error) => {

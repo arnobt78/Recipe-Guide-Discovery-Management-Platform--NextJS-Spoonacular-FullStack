@@ -19,6 +19,7 @@ import * as api from "../api";
 import { RecipeNote } from "../types";
 import { toast } from "sonner";
 import { useAuthCheck } from "./useAuthCheck";
+import { invalidateBusinessInsights } from "../utils/queryInvalidation";
 
 /**
  * Hook to get recipe note for a specific recipe
@@ -65,6 +66,7 @@ export function useSaveRecipeNote(): UseMutationResult<
       api.saveRecipeNote(recipeId, { title, content, rating, tags }),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["recipe-note", data.recipeId] });
+      invalidateBusinessInsights(queryClient);
       toast.success("Note saved successfully!");
     },
     onError: (error: Error) => {
@@ -89,6 +91,7 @@ export function useDeleteRecipeNote(): UseMutationResult<void, Error, number> {
     mutationFn: (recipeId: number) => api.deleteRecipeNote(recipeId),
     onSuccess: (_, recipeId) => {
       queryClient.invalidateQueries({ queryKey: ["recipe-note", recipeId] });
+      invalidateBusinessInsights(queryClient);
       toast.success("Note deleted successfully!");
     },
     onError: (error: Error) => {

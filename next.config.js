@@ -43,6 +43,11 @@ const nextConfig = {
             hostname: 'lh3.googleusercontent.com',
             pathname: '/**',
           },
+          {
+            protocol: 'https',
+            hostname: 'images.ctfassets.net',
+            pathname: '/**',
+          },
         ],
       },
   // Environment variables that should be available on the client

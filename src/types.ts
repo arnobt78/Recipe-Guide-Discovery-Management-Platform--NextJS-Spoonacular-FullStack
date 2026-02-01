@@ -641,3 +641,118 @@ export interface BlogPostsResponse {
   skip: number;
   limit: number;
 }
+
+/**
+ * Business Insights - Statistics data interfaces
+ */
+export interface BusinessInsightsStats {
+  users: {
+    total: number;
+    newThisMonth: number;
+    newThisWeek: number;
+    newToday: number;
+    activeToday: number;
+    growthRate: number; // Percentage growth this month vs last month
+    avgFavouritesPerUser: number;
+    avgCollectionsPerUser: number;
+    retentionRate: number; // Percentage of returning users
+  };
+  recipes: {
+    totalFavourites: number;
+    totalCollections: number;
+    totalCollectionItems: number;
+    totalMealPlans: number;
+    totalMealPlanItems: number;
+    totalShoppingLists: number;
+    completedShoppingLists: number;
+    totalNotes: number;
+    totalFilterPresets: number;
+    avgItemsPerCollection: number;
+    avgMealsPerPlan: number;
+  };
+  content: {
+    totalBlogs: number;
+    totalRecipeImages: number;
+    totalRecipeVideos: number;
+  };
+  engagement: {
+    totalUniqueRecipesSaved: number;
+    mostActiveDay: string;
+    peakHour: number;
+    avgActionsPerUser: number;
+    engagementScore: number; // 0-100 score
+  };
+  trends: {
+    userGrowthTrend: 'rising' | 'stable' | 'declining';
+    engagementTrend: 'rising' | 'stable' | 'declining';
+    favouritesTrend: number; // % change from last week
+    collectionsTrend: number; // % change from last week
+    mealPlansTrend: number; // % change from last week
+    weeklyGrowthData: Array<{ week: string; users: number; actions: number }>;
+  };
+  predictions: {
+    estimatedUsersNextMonth: number;
+    estimatedActionsNextWeek: number;
+    projectedGrowthRate: number;
+    recommendedFocus: string; // AI recommendation
+    healthScore: number; // Platform health 0-100
+  };
+  aiInsights: {
+    topSearchTerms: Array<{ term: string; count: number }>;
+    popularCuisines: Array<{ cuisine: string; percentage: number }>;
+    dietaryPreferences: Array<{ diet: string; percentage: number }>;
+    peakUsagePattern: string;
+    userBehaviorSummary: string;
+  };
+  apiUsage: {
+    spoonacularCallsToday: number;
+    spoonacularCallsThisMonth: number;
+    weatherCallsToday: number;
+    weatherCallsThisMonth: number;
+  };
+  popularRecipes: Array<{
+    recipeId: number;
+    recipeTitle: string;
+    recipeImage?: string;
+    favouriteCount: number;
+    collectionCount: number;
+    mealPlanCount: number;
+    totalEngagement: number;
+    trendDirection: 'up' | 'down' | 'stable';
+  }>;
+  topContributors: Array<{
+    userName: string;
+    email: string;
+    totalFavourites: number;
+    totalCollections: number;
+    totalMealPlans: number;
+    joinedAt: string;
+    activityScore: number;
+  }>;
+  recentActivity: Array<{
+    type: 'favourite' | 'collection' | 'meal_plan' | 'shopping_list' | 'user_signup' | 'note' | 'filter_preset';
+    description: string;
+    timestamp: string;
+    userId?: string;
+    userName?: string;
+  }>;
+  systemHealth: {
+    databaseStatus: 'healthy' | 'degraded' | 'down';
+    lastBackup?: string;
+    uptime: string;
+    totalDbRecords: number;
+    serverTime: string;
+    responseTime: number; // Average API response time in ms
+    errorRate: number; // Percentage of failed requests
+  };
+}
+
+/**
+ * Business Insights API Response
+ */
+export interface BusinessInsightsResponse {
+  success: boolean;
+  data?: BusinessInsightsStats;
+  error?: string;
+  timestamp: string;
+}

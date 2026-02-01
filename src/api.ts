@@ -27,6 +27,7 @@ import {
   RecipeVideo,
   BlogPost,
   BlogPostsResponse,
+  BusinessInsightsResponse,
 } from "./types";
 
 // Use relative paths for API calls - works with Next.js API routes
@@ -1058,6 +1059,39 @@ export const getCollection = async (
 };
 
 /**
+ * Get collection recipes with full details from Spoonacular API
+ *
+ * @param collectionId - Collection ID
+ * @returns Promise with full recipe details
+ * @throws Error if request fails
+ */
+export const getCollectionRecipes = async (
+  collectionId: string
+): Promise<{ results: Recipe[]; _message?: string }> => {
+  const apiPath = getApiUrl(`/api/collections/${collectionId}/recipes`);
+  const response = await fetch(apiPath, {
+    method: "GET",
+    headers: await getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error("User not authenticated");
+    }
+    if (response.status === 404) {
+      throw new Error("Collection not found");
+    }
+    const errorMessage = await extractErrorMessage(
+      response,
+      `Request failed. Status: ${response.status}`
+    );
+    throw new Error(errorMessage);
+  }
+
+  return response.json();
+};
+
+/**
  * Update a collection
  *
  * @param collectionId - Collection ID
@@ -2016,4 +2050,30 @@ export const getBlogPost = async (slug: string): Promise<BlogPost> => {
   }
 
   return response.json() as Promise<BlogPost>;
+};
+
+/**
+ * Get business insights and statistics
+ * 
+ * @returns Promise with business insights data
+ * @throws Error if request fails
+ */
+export const getBusinessInsights = async (): Promise<BusinessInsightsResponse> => {
+  const apiPath = getApiUrl("/api/business-insights");
+  const response = await fetch(apiPath, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    const errorMessage = await extractErrorMessage(
+      response,
+      `Failed to fetch business insights. Status: ${response.status}`
+    );
+    throw new Error(errorMessage);
+  }
+
+  return response.json() as Promise<BusinessInsightsResponse>;
 };

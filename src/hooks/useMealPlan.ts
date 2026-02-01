@@ -19,6 +19,7 @@ import * as api from "../api";
 import { MealPlanItem } from "../types";
 import { toast } from "sonner";
 import { useAuthCheck } from "./useAuthCheck";
+import { invalidateBusinessInsights } from "../utils/queryInvalidation";
 
 /**
  * Hook to get meal plan for a week
@@ -66,6 +67,7 @@ export function useAddMealPlanItem(): UseMutationResult<
     mutationFn: (data) => api.addMealPlanItem(data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["meal-plan", variables.weekStart] });
+      invalidateBusinessInsights(queryClient);
       toast.success("Recipe added to meal plan!");
     },
     onError: (error: Error) => {
@@ -95,6 +97,7 @@ export function useRemoveMealPlanItem(): UseMutationResult<void, Error, { itemId
       if (variables.weekStart) {
         queryClient.invalidateQueries({ queryKey: ["meal-plan", variables.weekStart] });
       }
+      invalidateBusinessInsights(queryClient);
       toast.success("Recipe removed from meal plan!");
     },
     onError: (error: Error) => {

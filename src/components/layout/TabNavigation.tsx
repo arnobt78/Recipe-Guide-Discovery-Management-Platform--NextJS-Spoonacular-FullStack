@@ -43,7 +43,7 @@ const TabNavigation = memo(({ value, onValueChange }: TabNavigationProps) => {
       <Tabs value={value} onValueChange={(v) => onValueChange(v as TabType)}>
         <TabsList
           className={`grid w-full ${
-            isAuthenticated ? "max-w-5xl grid-cols-5" : "max-w-md grid-cols-1"
+            isAuthenticated ? "max-w-9xl grid-cols-5" : "max-w-md grid-cols-1"
           } bg-slate-800/50 border border-green-500/30 shadow-lg shadow-green-500/10`}
         >
           <TabsTrigger

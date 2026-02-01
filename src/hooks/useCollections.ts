@@ -18,7 +18,7 @@ import {
 import * as api from "../api";
 import { RecipeCollection, CollectionItem, Recipe } from "../types";
 import { toast } from "sonner";
-import { invalidateCollectionsQueries } from "../utils/queryInvalidation";
+import { invalidateCollectionsQueries, invalidateBusinessInsights } from "../utils/queryInvalidation";
 import { useAuthCheck } from "./useAuthCheck";
 import { usePostHog } from "./usePostHog";
 
@@ -65,6 +65,29 @@ export function useCollection(collectionId: string | undefined, enabled: boolean
 }
 
 /**
+ * Hook to get collection recipes with full Spoonacular details
+ * (calories, time, servings, dietary info, cuisines, etc.)
+ *
+ * @param collectionId - Collection ID
+ * @param enabled - Whether to enable the query
+ * @returns Query result with full recipe details
+ */
+export function useCollectionRecipes(collectionId: string | undefined, enabled: boolean = true) {
+  const isAuthenticated = useAuthCheck();
+  
+  return useQuery({
+    queryKey: ["collection", collectionId, "recipes"],
+    queryFn: () => api.getCollectionRecipes(collectionId!),
+    enabled: enabled && !!collectionId && isAuthenticated, // SSR-safe
+    staleTime: Infinity,
+    gcTime: 5 * 60 * 1000,
+    retry: 1,
+    refetchOnMount: true,
+    placeholderData: (previousData) => previousData,
+  });
+}
+
+/**
  * Hook to create a new collection
  *
  * @returns Mutation object with mutate, mutateAsync, isLoading, error, etc.
@@ -82,6 +105,7 @@ export function useCreateCollection(): UseMutationResult<
       api.createCollection(name, description, color),
     onSuccess: (data) => {
       invalidateCollectionsQueries(queryClient);
+      invalidateBusinessInsights(queryClient);
       
       // Track PostHog event
       trackCollection("created", data.id, data.name);
@@ -114,6 +138,7 @@ export function useUpdateCollection(): UseMutationResult<
     mutationFn: ({ collectionId, updates }) => api.updateCollection(collectionId, updates),
     onSuccess: (data) => {
       invalidateCollectionsQueries(queryClient);
+      invalidateBusinessInsights(queryClient);
       queryClient.invalidateQueries({ queryKey: ["collection", data.id] });
       toast.success("Collection updated successfully!");
     },
@@ -136,6 +161,7 @@ export function useDeleteCollection(): UseMutationResult<void, Error, string> {
     mutationFn: (collectionId: string) => api.deleteCollection(collectionId),
     onSuccess: () => {
       invalidateCollectionsQueries(queryClient);
+      invalidateBusinessInsights(queryClient);
       toast.success("Collection deleted successfully!");
     },
     onError: (error: Error) => {
@@ -163,7 +189,9 @@ export function useAddRecipeToCollection(): UseMutationResult<
       api.addRecipeToCollection(collectionId, recipe, order),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["collection", variables.collectionId] });
+      queryClient.invalidateQueries({ queryKey: ["collection", variables.collectionId, "recipes"] });
       invalidateCollectionsQueries(queryClient);
+      invalidateBusinessInsights(queryClient);
       
       // Track PostHog event
       trackCollection("recipe_added", variables.collectionId, variables.recipe.title);
@@ -197,7 +225,9 @@ export function useRemoveRecipeFromCollection(): UseMutationResult<
       api.removeRecipeFromCollection(collectionId, recipeId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["collection", variables.collectionId] });
+      queryClient.invalidateQueries({ queryKey: ["collection", variables.collectionId, "recipes"] });
       invalidateCollectionsQueries(queryClient);
+      invalidateBusinessInsights(queryClient);
       toast.success("Recipe removed from collection!");
     },
     onError: (error: Error) => {

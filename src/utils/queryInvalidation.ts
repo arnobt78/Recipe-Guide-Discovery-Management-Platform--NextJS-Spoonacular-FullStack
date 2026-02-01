@@ -10,6 +10,28 @@
 import { QueryClient } from "@tanstack/react-query";
 
 /**
+ * Invalidate business insights query
+ * Call this when any user data changes that affects global statistics:
+ * - User registration/deletion
+ * - Favourites added/removed
+ * - Collections created/updated/deleted
+ * - Collection items added/removed
+ * - Meal plans created/updated/deleted
+ * - Shopping lists created/updated/deleted
+ * - Notes created/updated/deleted
+ * - Filter presets created/updated/deleted
+ * - Images added/removed
+ * - Videos added/removed
+ * 
+ * @param queryClient - React Query client instance
+ */
+export function invalidateBusinessInsights(queryClient: QueryClient) {
+  queryClient.invalidateQueries({
+    queryKey: ["business", "insights"],
+  });
+}
+
+/**
  * Invalidate all recipe-related queries
  * Call this when:
  * - Recipe is added/removed from favourites

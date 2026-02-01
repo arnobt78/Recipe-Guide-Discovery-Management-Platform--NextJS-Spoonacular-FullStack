@@ -14,6 +14,7 @@
 
 import { memo, useState, useCallback, useMemo, useEffect } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { startOfWeek, addDays, format } from "date-fns";
@@ -59,6 +60,7 @@ interface MealPlannerProps {
  * Weekly meal planning with calendar view
  */
 const MealPlanner = memo((_props: MealPlannerProps) => {
+  const router = useRouter();
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(
     startOfWeek(new Date(), { weekStartsOn: 1 })
   );
@@ -213,10 +215,20 @@ const MealPlanner = memo((_props: MealPlannerProps) => {
       <Card className="glow-card border-purple-500/30">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="gradient-text flex items-center gap-2">
-              <CalendarIcon className="h-5 w-5" />
-              Meal Planner
-            </CardTitle>
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl self-stretch flex items-center">
+                <CalendarIcon className="h-6 w-6 text-green-400" />
+              </div>
+              <div className="flex flex-col">
+                <CardTitle className="text-lg font-bold bg-gradient-to-r from-green-400 via-emerald-400 to-green-400 bg-clip-text text-transparent">
+                  Meal Planner
+                </CardTitle>
+                <p className="text-sm text-gray-400 mt-1">
+                  Plan your weekly meals by adding recipes from your favourites.
+                  Click on any meal to view its details.
+                </p>
+              </div>
+            </div>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
@@ -334,7 +346,12 @@ const MealPlanner = memo((_props: MealPlannerProps) => {
                           exit={{ opacity: 0, y: -10 }}
                           className="relative group"
                         >
-                          <Card className="glow-card border-purple-500/20 p-2">
+                          <Card
+                            className="glow-card border-purple-500/20 p-2 cursor-pointer hover:border-purple-500/40 hover:bg-purple-500/5 transition-all duration-200"
+                            onClick={() =>
+                              router.push(`/recipe/${meal.recipeId}`)
+                            }
+                          >
                             <div className="flex items-start gap-2">
                               {meal.recipeImage && (
                                 <div className="relative flex-shrink-0 w-12 h-12 rounded overflow-hidden">
@@ -348,7 +365,7 @@ const MealPlanner = memo((_props: MealPlannerProps) => {
                                 </div>
                               )}
                               <div className="flex-1 min-w-0">
-                                <p className="text-xs font-medium truncate">
+                                <p className="text-xs font-medium truncate hover:text-purple-300 transition-colors">
                                   {meal.recipeTitle}
                                 </p>
                                 {meal.servings > 1 && (
@@ -361,7 +378,10 @@ const MealPlanner = memo((_props: MealPlannerProps) => {
                                 variant="ghost"
                                 size="icon"
                                 className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={() => handleRemoveMeal(meal)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveMeal(meal);
+                                }}
                               >
                                 <X className="h-3 w-3" />
                               </Button>

@@ -19,6 +19,7 @@ import * as api from "../api";
 import { RecipeImage } from "../types";
 import { toast } from "sonner";
 import { useAuthCheck } from "./useAuthCheck";
+import { invalidateBusinessInsights } from "../utils/queryInvalidation";
 
 /**
  * Hook to get recipe images
@@ -90,6 +91,7 @@ export function useAddRecipeImage(): UseMutationResult<
     mutationFn: (data) => api.addRecipeImage(data),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["recipe-images", data.recipeId] });
+      invalidateBusinessInsights(queryClient);
       toast.success("Image added to recipe!");
     },
     onError: (error: Error) => {
@@ -113,6 +115,7 @@ export function useRemoveRecipeImage(): UseMutationResult<void, Error, { id: str
       // Invalidate both the specific recipe's images and all recipe images queries
       queryClient.invalidateQueries({ queryKey: ["recipe-images", variables.recipeId] });
       queryClient.invalidateQueries({ queryKey: ["recipe-images"] });
+      invalidateBusinessInsights(queryClient);
       toast.success("Image removed successfully!");
     },
     onError: (error: Error) => {

@@ -1,36 +1,23 @@
-"use client";
-
-import { AuthProvider } from "@/context/AuthContext";
-import { RecipeProvider } from "@/context/RecipeContext";
-import BlogPostList from "@/components/blog/BlogPostList";
-import Navbar from "@/components/layout/Navbar";
-import HeroHeader from "@/components/layout/HeroHeader";
+import BlogPageClient from "@/components/pages/BlogPage";
 
 /**
- * Blog Page
+ * Blog Page (Server Component)
+ *
  * Displays blog posts list from Contentful CMS
- * Next.js App Router - Client Component
+ * This is a Server Component that imports the Client Component
+ * for faster initial page load and better SEO
+ *
+ * Following DEVELOPMENT_RULES.md: Server/Client component separation
  */
 export default function BlogPage() {
-  return (
-    <AuthProvider>
-      <RecipeProvider>
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-          <Navbar />
-          <HeroHeader />
-          <main className=" max-w-9xl mx-auto px-2 sm:px-4 md:px-6 xl:px-8 py-8">
-            <div className="mb-4">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
-                Recipe Blog & Articles
-              </h1>
-              <p className="text-gray-400 text-lg">
-                Discover cooking tips, recipe stories, and culinary insights
-              </p>
-            </div>
-            <BlogPostList limit={12} />
-          </main>
-        </div>
-      </RecipeProvider>
-    </AuthProvider>
-  );
+  return <BlogPageClient />;
 }
+
+/**
+ * Metadata for the page
+ */
+export const metadata = {
+  title: "Recipe Blog & Articles | FlavorVerse",
+  description:
+    "Discover cooking tips, recipe stories, and culinary insights from our recipe blog.",
+};

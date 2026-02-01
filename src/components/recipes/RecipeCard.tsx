@@ -129,7 +129,7 @@ const RecipeCard = memo(
         whileHover={{ scale: 1.02, y: -5 }}
         whileTap={{ scale: 0.98 }}
         onClick={handleCardClick}
-        className="cursor-pointer"
+        className="cursor-pointer h-full"
       >
         <Card className="glow-card group h-full flex flex-col overflow-hidden min-h-[320px]">
           {/* Recipe Image */}

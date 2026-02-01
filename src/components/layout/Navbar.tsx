@@ -39,6 +39,8 @@ import {
   FolderOpen,
   Calendar,
   ShoppingCart,
+  BarChart3,
+  Home,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useRecipeContext } from "../../context/RecipeContext";
@@ -247,6 +249,15 @@ const Navbar = memo(() => {
 
           {/* Navigation & Auth Buttons */}
           <div className="flex items-center gap-2">
+            {/* Home Link */}
+            <Button
+              variant="ghost"
+              onClick={() => router.push("/")}
+              className="hidden sm:flex items-center gap-2 text-gray-300 hover:text-white hover:bg-green-500/20 hover:shadow-md hover:shadow-green-500/20 transition-all duration-300"
+            >
+              <Home className="h-4 w-4" />
+              <span>Home</span>
+            </Button>
             {/* Blog Link */}
             <Button
               variant="ghost"
@@ -255,6 +266,15 @@ const Navbar = memo(() => {
             >
               <BookOpen className="h-4 w-4" />
               <span>Blog</span>
+            </Button>
+            {/* Business Insights Link */}
+            <Button
+              variant="ghost"
+              onClick={() => router.push("/business-insights")}
+              className="hidden sm:flex items-center gap-2 text-gray-300 hover:text-white hover:bg-cyan-500/20 hover:shadow-md hover:shadow-cyan-500/20 transition-all duration-300"
+            >
+              <BarChart3 className="h-4 w-4" />
+              <span>Insights</span>
             </Button>
             {/* Auth Section - Three states (SSR-safe):
                 1. Authenticated → Profile dropdown

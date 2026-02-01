@@ -176,24 +176,35 @@ const ShoppingListGenerator = memo((_props: ShoppingListGeneratorProps) => {
       {/* Create New Shopping List */}
       <Card className="glow-card border-purple-500/30">
         <CardHeader>
-          <CardTitle className="gradient-text flex items-center gap-2">
-            <ShoppingCart className="h-5 w-5" />
-            Shopping List Generator
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-br from-orange-500/20 to-amber-500/20 rounded-xl self-stretch flex items-center">
+                <ShoppingCart className="h-6 w-6 text-orange-400" />
+              </div>
+              <div className="flex flex-col">
+                <CardTitle className="text-lg font-bold bg-gradient-to-r from-orange-400 via-amber-400 to-orange-400 bg-clip-text text-transparent">
+                  Shopping List Generator
+                </CardTitle>
+                <p className="text-sm text-gray-400 mt-1">
+                  Create shopping lists from your favourite recipes and export them for easy grocery shopping.
+                </p>
+              </div>
+            </div>
+            {!isCreating && (
+              <Button
+                onClick={() => setIsCreating(true)}
+                className="glow-button flex items-center gap-2"
+                variant="default"
+                aria-label="Create new shopping list"
+              >
+                <Plus className="h-4 w-4" />
+                New Shopping List
+              </Button>
+            )}
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {!isCreating ? (
-            <Button
-              onClick={() => setIsCreating(true)}
-              className="glow-button w-full"
-              variant="default"
-              aria-label="Create new shopping list"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create New Shopping List
-            </Button>
-          ) : (
-            <div className="space-y-4">
+        {isCreating && (
+          <CardContent className="space-y-4">
               <Input
                 placeholder="Shopping list name..."
                 value={listName}
@@ -300,14 +311,13 @@ const ShoppingListGenerator = memo((_props: ShoppingListGeneratorProps) => {
                   Cancel
                 </Button>
               </div>
-            </div>
-          )}
-        </CardContent>
+          </CardContent>
+        )}
       </Card>
 
       {/* Existing Shopping Lists */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold gradient-text">
+        <h3 className="text-lg font-semibold text-white">
           Your Shopping Lists
         </h3>
         {displayShoppingLists.length === 0 ? (

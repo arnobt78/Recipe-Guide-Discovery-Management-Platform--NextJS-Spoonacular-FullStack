@@ -86,6 +86,61 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     /**
+     * SignIn callback - runs on every sign in
+     * Used to create database records for OAuth users (Google, etc.)
+     */
+    async signIn({ user, account, profile }) {
+      // Only handle OAuth providers (not Credentials - those are handled by signup API)
+      if (account?.provider === "google" && user.email) {
+        try {
+          // Check if user already exists in database
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email.trim().toLowerCase() },
+          });
+
+          if (!existingUser) {
+            // Create new user for OAuth sign-in
+            const userId = `google_${user.email.split("@")[0]}_${Date.now()}`;
+            await prisma.user.create({
+              data: {
+                id: userId,
+                email: user.email.trim().toLowerCase(),
+                name: user.name || profile?.name || null,
+                picture: user.image || (profile as { picture?: string })?.picture || null,
+                password: null, // OAuth users don't have passwords
+              },
+            });
+            console.log(`✅ Google OAuth user created: ${user.email} (ID: ${userId})`);
+            
+            // Update the user object with the new ID for JWT
+            user.id = userId;
+          } else {
+            // User exists - update their info and use existing ID
+            await prisma.user.update({
+              where: { email: user.email.trim().toLowerCase() },
+              data: {
+                name: user.name || profile?.name || existingUser.name,
+                picture: user.image || (profile as { picture?: string })?.picture || existingUser.picture,
+                updatedAt: new Date(),
+              },
+            });
+            console.log(`✅ Google OAuth user updated: ${user.email} (ID: ${existingUser.id})`);
+            
+            // Use existing user ID for JWT
+            user.id = existingUser.id;
+          }
+        } catch (error) {
+          console.error("Error creating/updating OAuth user:", error);
+          // Still allow sign-in even if database operation fails
+          // The user will just not have a database record until next sign-in
+        }
+      }
+      
+      // Return true to allow sign-in
+      return true;
+    },
+
+    /**
      * JWT callback - runs whenever a JWT is accessed
      * Used to add custom claims to the token
      */

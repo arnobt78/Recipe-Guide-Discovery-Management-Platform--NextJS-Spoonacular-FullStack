@@ -18,7 +18,7 @@ import { memo, useState, useCallback, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, CloudSun, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Card, CardContent, CardHeader } from "../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { AdvancedFilterOptions } from "../../types";
@@ -98,21 +98,21 @@ const HeroSearchSection = memo(
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
             >
-              {/* Search Card - Consistent style with Weather Magic */}
-              <Card className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-purple-500/30 backdrop-blur-sm rounded-xl">
+              {/* Search Card - Consistent style with Collections/Shopping */}
+              <Card className="glow-card border-purple-500/30">
                 <CardHeader>
-                  <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 bg-purple-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <Search className="h-7 w-7 text-purple-400" />
+                      <div className="p-3 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl self-stretch flex items-center">
+                        <Search className="h-6 w-6 text-purple-400" />
                       </div>
-                      <div>
-                        <span className="block text-lg sm:text-xl font-semibold text-white">
+                      <div className="flex flex-col">
+                        <CardTitle className="text-lg font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent text-start">
                           Recipe Search
-                        </span>
-                        <span className="block text-sm text-gray-400">
+                        </CardTitle>
+                        <p className="text-sm text-gray-400">
                           Find your perfect recipe
-                        </span>
+                        </p>
                       </div>
                     </div>
                     <AdvancedFilters

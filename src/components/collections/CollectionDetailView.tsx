@@ -15,13 +15,13 @@
  */
 
 import { memo, useCallback, useState } from "react";
-import { useCollection, useRemoveRecipeFromCollection, useUpdateCollection, useDeleteCollection } from "../../hooks/useCollections";
+import { useCollection, useCollectionRecipes, useRemoveRecipeFromCollection, useUpdateCollection, useDeleteCollection } from "../../hooks/useCollections";
 import RecipeGrid from "../recipes/RecipeGrid";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { ArrowLeft, Edit2, Trash2, Folder } from "lucide-react";
-import { RecipeCollection, CollectionItem, Recipe } from "../../types";
+import { RecipeCollection, Recipe } from "../../types";
 import EmptyState from "../common/EmptyState";
 import SkeletonCollectionDetail from "../skeletons/SkeletonCollectionDetail";
 import { Input } from "../ui/input";
@@ -51,7 +51,8 @@ const CollectionDetailView = memo(({
   const [editName, setEditName] = useState(collection.name);
   const [editDescription, setEditDescription] = useState(collection.description || "");
 
-  const { data: collectionData, isLoading } = useCollection(collection.id, true);
+  const { data: collectionData, isLoading: isCollectionLoading } = useCollection(collection.id, true);
+  const { data: recipesData, isLoading: isRecipesLoading } = useCollectionRecipes(collection.id, true);
   const removeRecipe = useRemoveRecipeFromCollection();
   const updateCollection = useUpdateCollection();
   const deleteCollection = useDeleteCollection();
@@ -59,13 +60,11 @@ const CollectionDetailView = memo(({
   const [recipeToRemove, setRecipeToRemove] = useState<Recipe | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  // Convert collection items to Recipe format for RecipeGrid
-  const recipes: Recipe[] = collectionData?.items?.map((item: CollectionItem) => ({
-    id: item.recipeId,
-    title: item.recipeTitle,
-    image: item.recipeImage || "",
-    imageType: "jpg",
-  })) || [];
+  // Use full recipe details from Spoonacular API (includes calories, time, dietary info, etc.)
+  const recipes: Recipe[] = recipesData?.results || [];
+  
+  // Combined loading state
+  const isLoading = isCollectionLoading || isRecipesLoading;
 
   const handleRemoveRecipeClick = useCallback((recipe: Recipe) => {
     setRecipeToRemove(recipe);

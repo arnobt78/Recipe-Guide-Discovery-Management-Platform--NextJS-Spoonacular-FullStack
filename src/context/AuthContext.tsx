@@ -11,8 +11,9 @@
  * Following DEVELOPMENT_RULES.md: Centralized context, reusable patterns
  */
 
-import { createContext, useContext, ReactNode, useEffect } from "react";
+import { createContext, useContext, ReactNode, useEffect, useRef } from "react";
 import { useSession, signIn as nextAuthSignIn, signOut as nextAuthSignOut } from "next-auth/react";
+import { useQueryClient } from "@tanstack/react-query";
 import { identifyUser, resetUser } from "../lib/posthog";
 
 interface User {
@@ -41,11 +42,32 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { data: session, status } = useSession();
+  const queryClient = useQueryClient();
   
   const user = session?.user as User | undefined;
   const isAuthenticated = status === "authenticated";
   const isLoading = status === "loading";
   const userId = user?.id || null;
+
+  // Track previous auth state to detect changes
+  const prevAuthState = useRef<{ isAuthenticated: boolean; userId: string | null }>({
+    isAuthenticated: false,
+    userId: null,
+  });
+
+  // Invalidate business insights when auth state changes (login/logout)
+  useEffect(() => {
+    const prevState = prevAuthState.current;
+    const authChanged = prevState.isAuthenticated !== isAuthenticated || prevState.userId !== userId;
+    
+    if (authChanged && !isLoading) {
+      // Auth state changed - invalidate business insights to refetch with new user data
+      queryClient.invalidateQueries({ queryKey: ["business", "insights"] });
+      
+      // Update previous state
+      prevAuthState.current = { isAuthenticated, userId };
+    }
+  }, [isAuthenticated, userId, isLoading, queryClient]);
 
   // Store user ID in localStorage for API calls (SSR-safe)
   // Also identify user in PostHog
@@ -118,6 +140,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     resetUser();
     // Sign out without redirect for smooth UI transition
     await nextAuthSignOut({ redirect: false });
+    // Invalidate business insights to update stats (user count may change)
+    queryClient.invalidateQueries({ queryKey: ["business", "insights"] });
   };
 
   // Get access token (for API calls)

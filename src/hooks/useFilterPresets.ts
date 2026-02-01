@@ -20,6 +20,7 @@ import * as api from "../api";
 import { FilterPreset, AdvancedFilterOptions } from "../types";
 import { toast } from "sonner";
 import { useAuthCheck } from "./useAuthCheck";
+import { invalidateBusinessInsights } from "../utils/queryInvalidation";
 
 /**
  * Hook to get all filter presets for the current user
@@ -96,6 +97,7 @@ export function useCreateFilterPreset(): UseMutationResult<
     onSuccess: () => {
       // Invalidate and refetch filter presets list
       queryClient.invalidateQueries({ queryKey: ["filters", "presets"] });
+      invalidateBusinessInsights(queryClient);
       toast.success("Filter preset created successfully");
     },
     onError: (error: Error) => {
@@ -133,6 +135,7 @@ export function useUpdateFilterPreset(): UseMutationResult<
       // Invalidate both list and specific preset
       queryClient.invalidateQueries({ queryKey: ["filters", "presets"] });
       queryClient.invalidateQueries({ queryKey: ["filters", "presets", variables.presetId] });
+      invalidateBusinessInsights(queryClient);
       toast.success("Filter preset updated successfully");
     },
     onError: (error: Error) => {
@@ -157,6 +160,7 @@ export function useDeleteFilterPreset(): UseMutationResult<void, Error, string> 
       // Invalidate both list and specific preset
       queryClient.invalidateQueries({ queryKey: ["filters", "presets"] });
       queryClient.removeQueries({ queryKey: ["filters", "presets", presetId] });
+      invalidateBusinessInsights(queryClient);
       toast.success("Filter preset deleted successfully");
     },
     onError: (error: Error) => {

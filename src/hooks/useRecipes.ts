@@ -18,7 +18,7 @@ import {
 import * as api from "../api";
 import { Recipe, SearchRecipesResponse, RecipeInformation, SimilarRecipe, AutocompleteRecipe, DishPairingForWine, WinePairing, RecipeRecommendationResponse, RecipeAnalysisResponse, RecipeModificationResponse, AdvancedFilterOptions } from "../types";
 import { toast } from "sonner";
-import { invalidateFavouritesQueries } from "../utils/queryInvalidation";
+import { invalidateFavouritesQueries, invalidateBusinessInsights } from "../utils/queryInvalidation";
 import {
   getCachedSearchResults,
   saveSearchResults,
@@ -291,6 +291,9 @@ export function useAddFavouriteRecipe(): UseMutationResult<void, Error, Recipe> 
       // UI updates immediately without page refresh
       invalidateFavouritesQueries(queryClient);
       
+      // Invalidate business insights to update stats
+      invalidateBusinessInsights(queryClient);
+      
       // Track PostHog event
       trackRecipe("favourite_added", recipe.id, recipe.title);
       
@@ -333,6 +336,9 @@ export function useRemoveFavouriteRecipe(): UseMutationResult<void, Error, Recip
       // This triggers refetch of favourites query
       // UI updates immediately without page refresh
       invalidateFavouritesQueries(queryClient);
+      
+      // Invalidate business insights to update stats
+      invalidateBusinessInsights(queryClient);
       
       // Track PostHog event
       trackRecipe("favourite_removed", recipe.id, recipe.title);

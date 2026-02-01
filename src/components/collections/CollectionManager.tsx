@@ -23,7 +23,7 @@ import CollectionCard from "./CollectionCard";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Plus, X } from "lucide-react";
+import { Plus, X, FolderOpen } from "lucide-react";
 import { RecipeCollection } from "../../types";
 import EmptyState from "../common/EmptyState";
 import SkeletonRecipeGrid from "../skeletons/SkeletonRecipeGrid";
@@ -93,20 +93,36 @@ const CollectionManager = memo(
 
     return (
       <div className="space-y-6">
-        {/* Create Collection Button/Form */}
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-white">My Collections</h2>
-          {!isCreating && (
-            <Button
-              onClick={() => setIsCreating(true)}
-              className="glow-button flex items-center gap-2"
-              aria-label="Create new collection"
-            >
-              <Plus className="h-4 w-4" />
-              New Collection
-            </Button>
-          )}
-        </div>
+        {/* Collections Header */}
+        <Card className="glow-card border-purple-500/30">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl self-stretch flex items-center">
+                  <FolderOpen className="h-6 w-6 text-purple-400" />
+                </div>
+                <div className="flex flex-col">
+                  <CardTitle className="text-lg font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+                    My Collections
+                  </CardTitle>
+                  <p className="text-sm text-gray-400 mt-1">
+                    Organize your favourite recipes into custom collections for easy access.
+                  </p>
+                </div>
+              </div>
+              {!isCreating && (
+                <Button
+                  onClick={() => setIsCreating(true)}
+                  className="glow-button flex items-center gap-2"
+                  aria-label="Create new collection"
+                >
+                  <Plus className="h-4 w-4" />
+                  New Collection
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+        </Card>
 
         {/* Create Collection Form */}
         <AnimatePresence>

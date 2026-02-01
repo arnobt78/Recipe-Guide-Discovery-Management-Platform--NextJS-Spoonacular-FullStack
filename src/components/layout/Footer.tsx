@@ -15,7 +15,7 @@
 
 import { memo, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChefHat, Heart, Sparkles, X } from "lucide-react";
+import { ChefHat, Heart, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 
