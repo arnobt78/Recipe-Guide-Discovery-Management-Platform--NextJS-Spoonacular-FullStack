@@ -110,10 +110,10 @@ const RecipeImageGallery = memo(({ recipe }: RecipeImageGalleryProps) => {
   // Group images by type
   // Map database types (main, other) to UI types (final, custom) for display
   const imagesByType = {
-    final: images.filter((img) => img.imageType === "final" || img.imageType === "main"),
+    final: images.filter((img) => img.imageType === "final"),
     step: images.filter((img) => img.imageType === "step"),
     ingredient: images.filter((img) => img.imageType === "ingredient"),
-    custom: images.filter((img) => img.imageType === "custom" || img.imageType === "other"),
+    custom: images.filter((img) => img.imageType === "custom"),
   };
 
   const imageTypeLabels: Record<string, string> = {
@@ -140,8 +140,8 @@ const RecipeImageGallery = memo(({ recipe }: RecipeImageGalleryProps) => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <CardTitle className="gradient-text flex items-center gap-2">
-          <Camera className="h-5 w-5" />
+        <CardTitle className="text-white flex items-center gap-2">
+          <Camera className="h-5 w-5 text-white" />
           Recipe Images
         </CardTitle>
         <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
