@@ -45,8 +45,9 @@ export function useFilterPresets() {
       }
     },
     enabled: isAuthenticated,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnMount: true,
+    staleTime: 0, // Always refetch fresh data for user-specific content
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
     retry: false, // Don't retry on auth errors
   });
 }
@@ -68,8 +69,9 @@ export function useFilterPreset(presetId: string | null, enabled: boolean = true
       return api.getFilterPreset(presetId);
     },
     enabled: enabled && isAuthenticated && presetId !== null,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnMount: true,
+    staleTime: 0, // Always refetch fresh data for user-specific content
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
     retry: 1,
   });
 }

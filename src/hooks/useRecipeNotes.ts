@@ -35,11 +35,11 @@ export function useRecipeNote(recipeId: number | undefined, enabled: boolean = t
     queryKey: ["recipe-note", recipeId],
     queryFn: () => api.getRecipeNote(recipeId!),
     enabled: enabled && !!recipeId && isAuthenticated, // SSR-safe
-    staleTime: Infinity,
+    staleTime: 0, // Always refetch fresh data for user-specific content
     gcTime: 5 * 60 * 1000,
     retry: 1,
-    refetchOnMount: true,
-    placeholderData: (previousData) => previousData,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
 }
 

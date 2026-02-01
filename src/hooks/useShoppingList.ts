@@ -32,12 +32,12 @@ export function useShoppingLists() {
   return useQuery({
     queryKey: ["shopping-lists"],
     queryFn: () => api.getShoppingLists(),
-    staleTime: Infinity,
+    staleTime: 0, // Always refetch fresh data for user-specific content
     gcTime: 5 * 60 * 1000,
     retry: 1,
-    refetchOnMount: true,
+    refetchOnMount: "always", // Always refetch on mount
+    refetchOnWindowFocus: true,
     enabled: isAuthenticated, // SSR-safe
-    placeholderData: (previousData) => previousData,
   });
 }
 

@@ -33,12 +33,12 @@ export function useCollections() {
   return useQuery({
     queryKey: ["collections"],
     queryFn: () => api.getCollections(),
-    staleTime: Infinity,
+    staleTime: 0, // Always refetch fresh data
     gcTime: 5 * 60 * 1000,
     retry: 1,
-    refetchOnMount: true,
+    refetchOnMount: "always", // Always refetch on mount
+    refetchOnWindowFocus: true, // Refetch when window regains focus
     enabled: isAuthenticated, // Only fetch if user is authenticated (SSR-safe)
-    placeholderData: (previousData) => previousData,
   });
 }
 
@@ -56,11 +56,11 @@ export function useCollection(collectionId: string | undefined, enabled: boolean
     queryKey: ["collection", collectionId],
     queryFn: () => api.getCollection(collectionId!),
     enabled: enabled && !!collectionId && isAuthenticated, // SSR-safe
-    staleTime: Infinity,
+    staleTime: 0, // Always refetch fresh data
     gcTime: 5 * 60 * 1000,
     retry: 1,
-    refetchOnMount: true,
-    placeholderData: (previousData) => previousData,
+    refetchOnMount: "always", // Always refetch on mount
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -79,11 +79,11 @@ export function useCollectionRecipes(collectionId: string | undefined, enabled: 
     queryKey: ["collection", collectionId, "recipes"],
     queryFn: () => api.getCollectionRecipes(collectionId!),
     enabled: enabled && !!collectionId && isAuthenticated, // SSR-safe
-    staleTime: Infinity,
+    staleTime: 0, // Always refetch fresh data
     gcTime: 5 * 60 * 1000,
     retry: 1,
-    refetchOnMount: true,
-    placeholderData: (previousData) => previousData,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
 }
 

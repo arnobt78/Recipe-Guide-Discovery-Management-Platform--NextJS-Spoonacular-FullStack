@@ -158,11 +158,11 @@ export function useFavouriteRecipes() {
       }
     },
     enabled: isAuthenticated, // Only fetch if user is authenticated (SSR-safe)
-    staleTime: Infinity,
+    staleTime: 0, // Always refetch fresh data for user-specific content
     gcTime: 5 * 60 * 1000,
     retry: false, // Don't retry on auth errors
-    refetchOnMount: true,
-    placeholderData: (previousData) => previousData,
+    refetchOnMount: "always", // Always refetch on mount
+    refetchOnWindowFocus: true, // Refetch when window regains focus
   });
 }
 

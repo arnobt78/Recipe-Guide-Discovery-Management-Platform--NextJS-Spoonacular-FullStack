@@ -39,8 +39,9 @@ export function useRecipeVideos(recipeId: number | null, enabled: boolean = true
       return api.getRecipeVideos(recipeId);
     },
     enabled: enabled && isAuthenticated && recipeId !== null,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnMount: true,
+    staleTime: 0, // Always refetch fresh data for user-specific content
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
     retry: 1,
   });
 }
