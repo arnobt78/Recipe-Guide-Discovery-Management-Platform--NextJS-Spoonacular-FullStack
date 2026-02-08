@@ -61,7 +61,7 @@ import SimilarRecipesList from "./SimilarRecipesList";
 const RecipeNotes = lazy(() => import("./RecipeNotes"));
 const RecipeImageGallery = lazy(() => import("./RecipeImageGallery"));
 const AddToCollectionDialog = lazy(
-  () => import("../collections/AddToCollectionDialog")
+  () => import("../collections/AddToCollectionDialog"),
 );
 
 interface Props {
@@ -95,7 +95,7 @@ const RecipeDetailCard = memo(
         addWinePairing: true, // Always get wine pairing
         addTasteData: true, // Get taste data for display
       },
-      true
+      true,
     );
 
     // Use similar recipes endpoint to get actual similar recipes
@@ -105,7 +105,7 @@ const RecipeDetailCard = memo(
     // Fallback to summary for summary text if needed
     const { data: recipeSummary } = useRecipeSummary(
       recipe.id.toString(),
-      true
+      true,
     );
 
     const { isAuthenticated } = useAuth();
@@ -125,32 +125,32 @@ const RecipeDetailCard = memo(
     const capitalizedTitle = useMemo(
       () =>
         capitalizeWords(
-          recipeInfo?.title || recipeSummary?.title || recipe.title
+          recipeInfo?.title || recipeSummary?.title || recipe.title,
         ),
-      [recipeInfo?.title, recipeSummary?.title, recipe.title]
+      [recipeInfo?.title, recipeSummary?.title, recipe.title],
     );
 
     // Use summary from recipeInfo if available, otherwise fallback to recipeSummary
     const summaryText = useMemo(
       () => recipeInfo?.summary || recipeSummary?.summary || "",
-      [recipeInfo?.summary, recipeSummary?.summary]
+      [recipeInfo?.summary, recipeSummary?.summary],
     );
 
     // Remove similar recipes text from summary since we display them separately
     const cleanedSummary = useMemo(
       () => removeSimilarRecipesFromSummary(summaryText),
-      [summaryText]
+      [summaryText],
     );
 
     const summaryWithTargetBlank = useMemo(
       () => addTargetBlankToLinks(cleanedSummary),
-      [cleanedSummary]
+      [cleanedSummary],
     );
 
     // Get source URL directly from API (much more reliable!)
     const sourceUrl = useMemo(
       () => recipeInfo?.sourceUrl || null,
-      [recipeInfo?.sourceUrl]
+      [recipeInfo?.sourceUrl],
     );
 
     // Debug: Log recipe information to verify data matches (development only)
@@ -158,10 +158,10 @@ const RecipeDetailCard = memo(
       if (process.env.NODE_ENV === "development" && recipeInfo) {
         // Find calories and protein from nutrition data
         const calories = recipeInfo.nutrition?.nutrients?.find((n) =>
-          n.name.toLowerCase().includes("calories")
+          n.name.toLowerCase().includes("calories"),
         );
         const protein = recipeInfo.nutrition?.nutrients?.find((n) =>
-          n.name.toLowerCase().includes("protein")
+          n.name.toLowerCase().includes("protein"),
         );
 
         console.log("🔍 [Recipe Debug] Recipe Information:", {
@@ -196,12 +196,12 @@ const RecipeDetailCard = memo(
           const caloriesNutrient = allNutrients.find(
             (n) =>
               n.name.toLowerCase().includes("calories") ||
-              n.name.toLowerCase() === "calories"
+              n.name.toLowerCase() === "calories",
           );
           const proteinNutrient = allNutrients.find(
             (n) =>
               n.name.toLowerCase().includes("protein") ||
-              n.name.toLowerCase() === "protein"
+              n.name.toLowerCase() === "protein",
           );
 
           console.log("🔍 [Recipe Debug] Full Nutrition Data:", {
@@ -222,7 +222,7 @@ const RecipeDetailCard = memo(
         // Log the full API response for comparison
         console.log(
           "🔍 [Recipe Debug] Full API Response (recipeInfo):",
-          recipeInfo
+          recipeInfo,
         );
       }
     }, [recipeInfo, recipe]);
@@ -360,7 +360,7 @@ const RecipeDetailCard = memo(
                   {isLoading ? (
                     <div className="space-y-6">
                       {/* Tabs Skeleton */}
-                      <div className="grid grid-cols-3 gap-2 mb-6">
+                      <div className="grid grid-cols-3 gap-2 mb-4 sm:mb-6">
                         <Skeleton className="h-10 w-full" />
                         <Skeleton className="h-10 w-full" />
                         <Skeleton className="h-10 w-full" />
@@ -379,7 +379,7 @@ const RecipeDetailCard = memo(
                       <TabsList
                         className={`grid w-full ${
                           isAuthenticated ? "grid-cols-5" : "grid-cols-3"
-                        } mb-6 bg-slate-800/50`}
+                        } mb-4 sm:mb-6 bg-slate-800/50`}
                       >
                         <TabsTrigger
                           value="summary"
@@ -449,7 +449,7 @@ const RecipeDetailCard = memo(
                         </div>
 
                         {/* Key Info Badges - Use data from recipeInfo API when available (prioritize API data over summary extraction) */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 sm:mb-6">
                           {/* Calories - Prioritize nutrition data if available, otherwise extract from summary */}
                           {(() => {
                             const caloriesNutrient =
@@ -591,7 +591,7 @@ const RecipeDetailCard = memo(
                                   <p className="text-lg font-bold text-white">
                                     {recipeInfo?.spoonacularScore
                                       ? `${Math.round(
-                                          recipeInfo.spoonacularScore
+                                          recipeInfo.spoonacularScore,
                                         )}%`
                                       : extractSummaryInfo?.score || "N/A"}
                                   </p>
@@ -621,7 +621,7 @@ const RecipeDetailCard = memo(
                                   {recipeInfo?.sourceName ||
                                     new URL(sourceUrl).hostname.replace(
                                       "www.",
-                                      ""
+                                      "",
                                     )}
                                 </a>
                                 <p className="text-xs text-gray-400 mb-2">
@@ -810,7 +810,7 @@ const RecipeDetailCard = memo(
                                             >
                                               {cuisine}
                                             </Badge>
-                                          )
+                                          ),
                                         )}
                                       </div>
                                     </div>
@@ -830,7 +830,7 @@ const RecipeDetailCard = memo(
                                             >
                                               {dishType}
                                             </Badge>
-                                          )
+                                          ),
                                         )}
                                       </div>
                                     </div>
@@ -1012,7 +1012,7 @@ const RecipeDetailCard = memo(
                                           >
                                             {occasion}
                                           </Badge>
-                                        )
+                                        ),
                                       )}
                                     </div>
                                   </div>
@@ -1111,7 +1111,7 @@ const RecipeDetailCard = memo(
                                                     Metric:{" "}
                                                     {Math.round(
                                                       ingredient.measures.metric
-                                                        .amount * 100
+                                                        .amount * 100,
                                                     ) / 100}{" "}
                                                     {
                                                       ingredient.measures.metric
@@ -1134,7 +1134,7 @@ const RecipeDetailCard = memo(
                                                       >
                                                         {meta}
                                                       </Badge>
-                                                    )
+                                                    ),
                                                   )}
                                                 </div>
                                               )}
@@ -1149,7 +1149,7 @@ const RecipeDetailCard = memo(
                                             )}
                                           </div>
                                         </div>
-                                      )
+                                      ),
                                     )}
                                   </div>
                                 </div>
@@ -1248,7 +1248,7 @@ const RecipeDetailCard = memo(
                                                                     )}
                                                                 </Badge>
                                                               </div>
-                                                            )
+                                                            ),
                                                           )}
                                                         </div>
                                                       </div>
@@ -1306,17 +1306,17 @@ const RecipeDetailCard = memo(
                                                                     )}
                                                                 </Badge>
                                                               </div>
-                                                            )
+                                                            ),
                                                           )}
                                                         </div>
                                                       </div>
                                                     )}
                                                 </div>
                                               </div>
-                                            )
+                                            ),
                                           )}
                                         </div>
-                                      )
+                                      ),
                                     )}
                                   </div>
                                 </div>
@@ -1351,7 +1351,7 @@ const RecipeDetailCard = memo(
                                             >
                                               {wine}
                                             </Badge>
-                                          )
+                                          ),
                                         )}
                                       </div>
                                     </div>
@@ -1404,7 +1404,7 @@ const RecipeDetailCard = memo(
                                                   <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/30">
                                                     Rating:{" "}
                                                     {product.averageRating.toFixed(
-                                                      1
+                                                      1,
                                                     )}
                                                     /5
                                                     {product.ratingCount >
@@ -1433,7 +1433,7 @@ const RecipeDetailCard = memo(
                                                         window.open(
                                                           product.link,
                                                           "_blank",
-                                                          "noopener,noreferrer"
+                                                          "noopener,noreferrer",
                                                         )
                                                       }
                                                     >
@@ -1445,7 +1445,7 @@ const RecipeDetailCard = memo(
                                               </div>
                                             </div>
                                           </div>
-                                        )
+                                        ),
                                       )}
                                     </div>
                                   )}
@@ -1624,7 +1624,7 @@ const RecipeDetailCard = memo(
         )}
       </motion.div>
     );
-  }
+  },
 );
 
 RecipeDetailCard.displayName = "RecipeDetailCard";

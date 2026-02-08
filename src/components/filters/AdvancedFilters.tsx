@@ -231,10 +231,11 @@ const AdvancedFilters = memo(
           <DialogTrigger asChild>
             <Button
               variant="outline"
-              className="relative inline-flex items-center gap-2 border-purple-500/30 bg-gradient-to-r from-purple-500/20 via-purple-500/10 to-purple-500/20 hover:from-purple-500/30 hover:via-purple-500/20 hover:to-purple-500/30"
+              className="relative inline-flex items-center gap-2 border-purple-500/30 bg-gradient-to-r from-purple-500/20 via-purple-500/10 to-purple-500/20 hover:from-purple-500/30 hover:via-purple-500/20 hover:to-purple-500/30 self-start"
             >
-              <SlidersHorizontal className="h-4 w-4" />
-              Advanced Filters
+              <SlidersHorizontal className="h-4 w-4 flex-shrink-0" />
+              <span className="hidden sm:inline">Advanced </span>
+              Filters
               {activeFilterCount > 0 && (
                 <Badge className="ml-1 bg-purple-500 text-white text-xs px-1.5 py-0.5">
                   {activeFilterCount}

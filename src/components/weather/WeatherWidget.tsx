@@ -31,7 +31,11 @@ import { WeatherSuggestionsResponse } from "../../types";
 
 interface WeatherWidgetProps {
   className?: string;
-  onWeatherDataChange?: (data: WeatherSuggestionsResponse | null, isLoading: boolean, error: Error | null) => void;
+  onWeatherDataChange?: (
+    data: WeatherSuggestionsResponse | null,
+    isLoading: boolean,
+    error: Error | null,
+  ) => void;
 }
 
 /**
@@ -54,7 +58,7 @@ const WeatherWidget = memo(
     const queryClient = useQueryClient();
     const { data, isLoading, error, refetch } = useWeatherSuggestions(
       location,
-      location !== null
+      location !== null,
     );
 
     // Pass weather data to parent whenever it changes
@@ -92,11 +96,11 @@ const WeatherWidget = memo(
           },
           (_error) => {
             setLocationError(
-              "Unable to get your location. Please enter a city name."
+              "Unable to get your location. Please enter a city name.",
             );
             setUseGeolocation(false);
             toast.error("Location access denied. Please enter a city name.");
-          }
+          },
         );
       }
     }, [useGeolocation]);
@@ -140,23 +144,25 @@ const WeatherWidget = memo(
     }, [location, refetch, queryClient]);
 
     return (
-      <Card className={`glow-card border-blue-500/30 ${className}`}>
+      <Card
+        className={`glow-card border-blue-500/30 w-full min-w-0 overflow-hidden ${className}`}
+      >
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl self-stretch flex items-center">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3">
+            <div className="flex items-start gap-3 min-w-0 w-full sm:w-auto">
+              <div className="p-3 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl flex-shrink-0 flex items-center">
                 <Cloud className="h-6 w-6 text-blue-400" />
               </div>
-              <div className="flex flex-col">
-                <CardTitle className="text-lg font-bold bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent text-start">
+              <div className="flex flex-col min-w-0 flex-1">
+                <CardTitle className="text-base sm:text-lg font-bold bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent text-start break-words">
                   Weather-Based Suggestions
                 </CardTitle>
-                <p className="text-sm text-gray-400">
+                <p className="text-xs sm:text-sm text-gray-400 break-words mt-0.5 w-full text-start">
                   Recipes perfect for your current weather
                 </p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-shrink-0 justify-center sm:justify-end sm:self-start w-full sm:w-auto">
               <Button
                 variant="outline"
                 size="sm"
@@ -165,9 +171,7 @@ const WeatherWidget = memo(
                 className="border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <RefreshCw
-                  className={`h-4 w-4 mr-2 ${
-                    isLoading ? "animate-spin" : ""
-                  }`}
+                  className={`h-4 w-4 mr-1 ${isLoading ? "animate-spin" : ""}`}
                 />
                 Refresh
               </Button>
@@ -178,7 +182,7 @@ const WeatherWidget = memo(
                   onClick={handleClearLocation}
                   className="border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-300"
                 >
-                  <X className="h-4 w-4 mr-2" />
+                  <X className="h-4 w-4 mr-1" />
                   Clear
                 </Button>
               )}
@@ -186,7 +190,7 @@ const WeatherWidget = memo(
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4">
           {/* Location Input */}
           {!location && (
             <div className="space-y-3">
@@ -197,11 +201,11 @@ const WeatherWidget = memo(
                 </div>
               )}
               {locationError && (
-                <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+                <div className="text-xs sm:text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2">
                   {locationError}
                 </div>
               )}
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Input
                   type="text"
                   placeholder="Enter city name (e.g., London, New York)"
@@ -212,11 +216,11 @@ const WeatherWidget = memo(
                       handleCitySubmit();
                     }
                   }}
-                  className="bg-slate-900/30 backdrop-blur-sm border-blue-500/30 text-white text-base rounded-xl focus:border-blue-400 focus:ring-blue-400/20"
+                  className="flex-1 min-w-0 bg-slate-900/30 backdrop-blur-sm border-blue-500/30 text-white text-sm sm:text-base rounded-xl focus:border-blue-400 focus:ring-blue-400/20"
                 />
                 <Button
                   onClick={handleCitySubmit}
-                  className="bg-gradient-to-r from-blue-500/70 via-blue-500/50 to-cyan-500/30 hover:from-blue-500/80 hover:via-blue-500/60 hover:to-cyan-500/40 rounded-xl"
+                  className="bg-gradient-to-r from-blue-500/70 via-blue-500/50 to-cyan-500/30 hover:from-blue-500/80 hover:via-blue-500/60 hover:to-cyan-500/40 rounded-xl flex-shrink-0"
                 >
                   Search
                 </Button>
@@ -226,66 +230,66 @@ const WeatherWidget = memo(
 
           {/* Location Display and Clear Button */}
           {data?.weather && (
-            <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
-              <div className="flex items-center gap-2 text-sm text-gray-300">
-                <MapPin className="h-4 w-4 text-blue-400" />
-                <span>{data.weather.location}</span>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between items-center gap-2 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 min-w-0">
+              <div className="flex items-center justify-center gap-2 text-sm text-gray-300 min-w-0 w-full sm:w-auto">
+                <MapPin className="h-4 w-4 text-blue-400 flex-shrink-0" />
+                <span className="truncate">{data.weather.location}</span>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleClearLocation}
-                className="text-gray-400 hover:text-white hover:bg-red-500/20"
+                className="text-gray-400 hover:text-white hover:bg-red-500/20 flex-shrink-0 border-2 border-white/10"
               >
                 <X className="h-4 w-4 mr-1" />
-                Clear Location
+                <span className="text-sm">Clear Location</span>
               </Button>
             </div>
           )}
 
           {/* Weather Display */}
           {data?.weather && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+            <div className="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
+              <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 min-w-0">
                 <div className="p-2 bg-blue-500/20 rounded-lg">
                   <Thermometer className="h-5 w-5 text-blue-400" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="text-xs text-gray-400">Temperature</p>
-                  <p className="text-lg font-semibold text-white">
+                  <p className="text-base sm:text-lg font-semibold text-white truncate">
                     {data.weather.temperature}°C
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+              <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 min-w-0">
                 <div className="p-2 bg-cyan-500/20 rounded-lg">
                   <Cloud className="h-5 w-5 text-cyan-400" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="text-xs text-gray-400">Condition</p>
-                  <p className="text-lg font-semibold text-white capitalize">
+                  <p className="text-base sm:text-lg font-semibold text-white capitalize truncate">
                     {data.weather.condition}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+              <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 min-w-0">
                 <div className="p-2 bg-green-500/20 rounded-lg">
                   <Droplets className="h-5 w-5 text-green-400" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="text-xs text-gray-400">Humidity</p>
-                  <p className="text-lg font-semibold text-white">
+                  <p className="text-base sm:text-lg font-semibold text-white truncate">
                     {data.weather.humidity}%
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+              <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 min-w-0">
                 <div className="p-2 bg-purple-500/20 rounded-lg">
                   <Wind className="h-5 w-5 text-purple-400" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="text-xs text-gray-400">Wind</p>
-                  <p className="text-lg font-semibold text-white">
+                  <p className="text-base sm:text-lg font-semibold text-white truncate">
                     {data.weather.windSpeed} m/s
                   </p>
                 </div>
@@ -295,8 +299,8 @@ const WeatherWidget = memo(
 
           {/* AI Reasoning */}
           {data?.reasoning && (
-            <div className="p-4 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-lg">
-              <p className="text-sm text-blue-300">
+            <div className="p-3 sm:p-4 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-lg">
+              <p className="text-xs sm:text-sm text-blue-300 break-words">
                 <span className="font-semibold">AI Insight: </span>
                 {data.reasoning}
               </p>
@@ -305,7 +309,7 @@ const WeatherWidget = memo(
         </CardContent>
       </Card>
     );
-  }
+  },
 );
 
 WeatherWidget.displayName = "WeatherWidget";

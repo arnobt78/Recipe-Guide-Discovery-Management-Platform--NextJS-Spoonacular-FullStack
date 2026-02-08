@@ -32,8 +32,9 @@
     border-color: hsl(var(--border));
   }
   
-  /* Thin scrollbar with stable gutter - prevents layout shift */
+  /* Prevent horizontal scroll - fit viewport */
   html {
+    overflow-x: hidden;
     overflow-y: scroll;
     scrollbar-gutter: stable;
     scrollbar-width: thin; /* Firefox */
@@ -60,7 +61,7 @@
   
   body {
     @apply bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-foreground;
-    @apply min-h-screen;
+    @apply min-h-screen min-w-0 overflow-x-hidden;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }

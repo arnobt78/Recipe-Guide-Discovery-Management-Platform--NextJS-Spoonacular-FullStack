@@ -57,7 +57,7 @@ export default function RootLayout({
       suppressHydrationWarning
       style={{ scrollbarGutter: "stable" }}
     >
-      <body suppressHydrationWarning>
+      <body suppressHydrationWarning className="overflow-x-hidden min-w-0">
         <RootLayoutProviders>{children}</RootLayoutProviders>
       </body>
     </html>

@@ -48,6 +48,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useRecipeContext } from "../../context/RecipeContext";
 import { LoginDialog } from "../auth/LoginDialog";
 import { RegisterDialog } from "../auth/RegisterDialog";
+import MobileNavbar, { MOBILE_NAV_ICON_CLASS } from "./MobileNavbar";
 import { toast } from "sonner";
 
 // Keys for persisting auth state in localStorage
@@ -221,9 +222,9 @@ const Navbar = memo(() => {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="sticky top-0 z-40 w-full border-b border-green-500/20 bg-slate-900/80 backdrop-blur-md shadow-lg shadow-green-500/10"
+      className="sticky top-0 z-40 w-full min-w-0 border-b border-green-500/20 bg-slate-900/80 backdrop-blur-md shadow-lg shadow-green-500/10"
     >
-      <div className="max-w-9xl mx-auto px-2 sm:px-4 md:px-6 xl:px-8">
+      <div className="max-w-9xl w-full mx-auto px-2 sm:px-4 md:px-6 xl:px-8 min-w-0 overflow-hidden">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <motion.div
@@ -389,7 +390,7 @@ const Navbar = memo(() => {
                 <Button
                   variant="ghost"
                   onClick={() => setIsLoginDialogOpen(true)}
-                  className="flex items-center gap-2 text-gray-300 hover:text-white hover:bg-green-500/20 hover:shadow-md hover:shadow-green-500/20 transition-all duration-300"
+                  className={`${MOBILE_NAV_ICON_CLASS} sm:gap-2 sm:min-w-0 sm:w-auto sm:px-4`}
                 >
                   <User className="h-4 w-4" />
                   <span className="hidden sm:inline">Login</span>
@@ -406,6 +407,11 @@ const Navbar = memo(() => {
                 />
               </>
             )}
+            {/* Mobile: Burger menu - right of user icon */}
+            <MobileNavbar
+              onLoginClick={() => setIsLoginDialogOpen(true)}
+              onRegisterClick={() => setIsRegisterDialogOpen(true)}
+            />
           </div>
         </div>
       </div>

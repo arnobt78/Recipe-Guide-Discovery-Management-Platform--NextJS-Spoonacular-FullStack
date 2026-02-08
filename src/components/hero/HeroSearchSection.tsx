@@ -42,7 +42,7 @@ interface HeroSearchSectionProps {
   onWeatherDataChange?: (
     data: WeatherSuggestionsResponse | null,
     isLoading: boolean,
-    error: Error | null
+    error: Error | null,
   ) => void;
   onSearchModeChange?: (mode: SearchMode) => void;
 }
@@ -76,7 +76,7 @@ const HeroSearchSection = memo(
           onSearchModeChange(mode);
         }
       },
-      [onSearchModeChange]
+      [onSearchModeChange],
     );
 
     return (
@@ -84,11 +84,14 @@ const HeroSearchSection = memo(
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, duration: 0.5 }}
-        className={cn("max-w-7xl mx-auto px-4", className)}
+        className={cn(
+          "w-full max-w-7xl mx-auto px-0 sm:px-4 min-w-0",
+          className,
+        )}
       >
         {/* Toggle Buttons */}
-        <div className="flex justify-center mb-6">
-          <div className="inline-flex items-center p-1.5 bg-slate-900/60 backdrop-blur-md rounded-2xl border border-purple-500/30 shadow-lg shadow-purple-500/10">
+        <div className="flex justify-center mb-4 sm:mb-6 overflow-hidden">
+          <div className="inline-flex items-center p-1.5 bg-slate-900/60 backdrop-blur-md rounded-2xl border border-purple-500/30 shadow-lg shadow-purple-500/10 flex-shrink-0">
             <ToggleButton
               active={activeMode === "search"}
               onClick={() => handleModeChange("search")}
@@ -115,18 +118,18 @@ const HeroSearchSection = memo(
               transition={{ duration: 0.3 }}
             >
               {/* Search Card - Consistent style with Collections/Shopping */}
-              <Card className="glow-card border-purple-500/30">
+              <Card className="glow-card border-purple-500/30 w-full min-w-0 overflow-hidden">
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-3 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl self-stretch flex items-center">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className="p-3 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl flex-shrink-0 flex items-center">
                         <Search className="h-6 w-6 text-purple-400" />
                       </div>
-                      <div className="flex flex-col">
-                        <CardTitle className="text-lg font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent text-start">
+                      <div className="flex flex-col min-w-0">
+                        <CardTitle className="text-base sm:text-lg font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent text-start break-words">
                           Recipe Search
                         </CardTitle>
-                        <p className="text-sm text-gray-400">
+                        <p className="text-xs sm:text-sm text-gray-400 break-words mt-0.5">
                           Find your perfect recipe
                         </p>
                       </div>
@@ -141,25 +144,28 @@ const HeroSearchSection = memo(
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {/* AI Search Hint */}
-                  <p className="text-center text-sm text-purple-300/80">
-                    <Sparkles className="inline h-4 w-4 mr-1" />
+                  <p className="text-center text-xs sm:text-sm text-purple-300/80 break-words px-1">
+                    <Sparkles className="inline h-4 w-4 mr-1 flex-shrink-0" />
                     Try &quot;quick healthy dinner&quot; or &quot;pasta with
                     tomatoes&quot; for AI-powered search
                   </p>
 
                   {/* Search Input */}
-                  <form onSubmit={onSearchSubmit} className="flex gap-3">
+                  <form
+                    onSubmit={onSearchSubmit}
+                    className="flex flex-col sm:flex-row gap-3"
+                  >
                     <Input
                       type="text"
                       value={searchTerm}
                       onChange={(e) => onSearchTermChange(e.target.value)}
-                      placeholder="Enter ingredients, dish name, or describe what you want..."
-                      className="flex-1 bg-slate-900/30 backdrop-blur-sm border-purple-500/30 text-white text-base placeholder:text-gray-400 rounded-xl focus:border-purple-400 focus:ring-purple-400/20"
+                      placeholder="Enter ingredients, dishes..."
+                      className="flex-1 min-w-0 bg-slate-900/30 backdrop-blur-sm border-purple-500/30 text-white text-sm sm:text-base placeholder:text-gray-400 rounded-xl focus:border-purple-400 focus:ring-purple-400/20"
                     />
                     <Button
                       type="submit"
                       disabled={isSearching || !searchTerm.trim()}
-                      className="bg-gradient-to-r from-purple-500/70 via-purple-500/50 to-pink-500/30 hover:from-purple-500/80 hover:via-purple-500/60 hover:to-pink-500/40 text-white px-6 rounded-xl"
+                      className="bg-gradient-to-r from-purple-500/70 via-purple-500/50 to-pink-500/30 hover:from-purple-500/80 hover:via-purple-500/60 hover:to-pink-500/40 text-white px-4 sm:px-6 rounded-xl flex-shrink-0"
                     >
                       {isSearching ? (
                         <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -189,7 +195,7 @@ const HeroSearchSection = memo(
         </AnimatePresence>
       </motion.div>
     );
-  }
+  },
 );
 
 HeroSearchSection.displayName = "HeroSearchSection";
@@ -213,7 +219,7 @@ const ToggleButton = memo(
           "relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300",
           active
             ? "bg-gradient-to-r from-purple-500/80 to-pink-500/80 text-white shadow-lg shadow-purple-500/30"
-            : "text-gray-400 hover:text-white hover:bg-white/5"
+            : "text-gray-400 hover:text-white hover:bg-white/5",
         )}
       >
         {/* Active indicator glow */}
@@ -230,7 +236,7 @@ const ToggleButton = memo(
         </span>
       </button>
     );
-  }
+  },
 );
 
 ToggleButton.displayName = "ToggleButton";

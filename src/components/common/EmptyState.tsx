@@ -51,17 +51,19 @@ const EmptyState = memo(
         className={`flex items-center justify-center ${compact ? "py-4" : "py-6"} ${className}`}
       >
         <Card
-          className={`glow-card border-purple-500/30 ${
+          className={`glow-card border-purple-500/30 min-w-0 overflow-hidden ${
             fullWidth ? "w-full" : "max-w-9xl w-full"
           } bg-gradient-to-br from-slate-800/50 to-purple-900/30`}
         >
-          <CardContent className={`${compact ? "p-4" : "p-4 sm:p-6 md:p-8"} text-center`}>
+          <CardContent
+            className={`${compact ? "p-4" : "p-4 sm:p-6 md:p-8"} text-center`}
+          >
             {/* Icon */}
             {/* <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="mb-6"
+              className="mb-4 sm:mb-6"
             >
               <div className="relative inline-block">
                 <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-xl" />
@@ -93,7 +95,7 @@ const EmptyState = memo(
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="text-sm sm:text-md text-gray-400 mb-6 px-2 xl:px-0"
+                className="text-sm sm:text-md text-gray-400 mb-4 sm:mb-6 px-2 xl:px-0 break-words"
               >
                 {subtitle}
               </motion.p>
@@ -104,7 +106,7 @@ const EmptyState = memo(
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="flex flex-wrap justify-center gap-2 sm:gap-3"
+              className="flex flex-wrap justify-center gap-2 sm:gap-3 min-w-0"
             >
               <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 px-3.5 py-1.5 text-xs sm:text-sm">
                 <Search className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
@@ -125,7 +127,7 @@ const EmptyState = memo(
         </Card>
       </motion.div>
     );
-  }
+  },
 );
 
 EmptyState.displayName = "EmptyState";

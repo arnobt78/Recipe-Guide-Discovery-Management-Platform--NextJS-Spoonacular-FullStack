@@ -99,7 +99,7 @@ const Footer = memo(() => {
         transition={{ delay: 0.5, duration: 0.5 }}
         className="w-full border-t border-purple-500/20 bg-slate-900/80 backdrop-blur-md"
       >
-        <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-9xl mx-auto px-2 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             {/* Left: Brand & Year */}
             <div className="flex items-center gap-3">
@@ -191,7 +191,7 @@ const Footer = memo(() => {
                           <span className="h-1.5 w-1.5 rounded-full bg-purple-400" />
                           {feature}
                         </motion.li>
-                      )
+                      ),
                     )}
                   </ul>
                 </div>

@@ -42,7 +42,7 @@ export default function TestSentryPage() {
           } else {
             // Check for API errors in console
             setPostHogStatus(
-              "❌ PostHog failed to load. Check console for 401 errors. Get Project API Key from Settings → Project Settings"
+              "❌ PostHog failed to load. Check console for 401 errors. Get Project API Key from Settings → Project Settings",
             );
           }
         }, 2000);
@@ -61,7 +61,7 @@ export default function TestSentryPage() {
     } catch (error) {
       Sentry.captureException(error);
       setTestResult(
-        "✅ Exception sent to Sentry! Check your Sentry dashboard."
+        "✅ Exception sent to Sentry! Check your Sentry dashboard.",
       );
     }
   };
@@ -106,13 +106,13 @@ export default function TestSentryPage() {
         timestamp: new Date().toISOString(),
       });
       setTestResult(
-        "✅ PostHog event sent! Check your PostHog dashboard (Events > Activity)."
+        "✅ PostHog event sent! Check your PostHog dashboard (Events > Activity).",
       );
     } catch (error) {
       setTestResult(
         `❌ PostHog error: ${
           error instanceof Error ? error.message : "Unknown error"
-        }`
+        }`,
       );
     }
   };
@@ -130,13 +130,13 @@ export default function TestSentryPage() {
         source: "test-page",
       });
       setTestResult(
-        "✅ PostHog user identified! Check your PostHog dashboard (Persons > test-user-123)."
+        "✅ PostHog user identified! Check your PostHog dashboard (Persons > test-user-123).",
       );
     } catch (error) {
       setTestResult(
         `❌ PostHog error: ${
           error instanceof Error ? error.message : "Unknown error"
-        }`
+        }`,
       );
     }
   };
@@ -152,12 +152,12 @@ export default function TestSentryPage() {
 
       if (data.success) {
         setTestResult(
-          "✅ Redis is working! All operations successful. Check terminal for details."
+          "✅ Redis is working! All operations successful. Check terminal for details.",
         );
         console.log("Redis Test Results:", data.results);
       } else {
         setTestResult(
-          `❌ Redis test failed: ${data.message}. Check console for details.`
+          `❌ Redis test failed: ${data.message}. Check console for details.`,
         );
         console.error("Redis Test Error:", data);
       }
@@ -165,7 +165,7 @@ export default function TestSentryPage() {
       setTestResult(
         `❌ Redis test error: ${
           error instanceof Error ? error.message : "Unknown error"
-        }`
+        }`,
       );
     }
   };
@@ -211,20 +211,20 @@ export default function TestSentryPage() {
                     backgroundColor: postHogStatus.includes("✅")
                       ? "rgba(34, 197, 94, 0.1)"
                       : postHogStatus.includes("❌")
-                      ? "rgba(239, 68, 68, 0.1)"
-                      : "rgba(251, 191, 36, 0.1)",
+                        ? "rgba(239, 68, 68, 0.1)"
+                        : "rgba(251, 191, 36, 0.1)",
                     border: `1px solid ${
                       postHogStatus.includes("✅")
                         ? "rgba(34, 197, 94, 0.3)"
                         : postHogStatus.includes("❌")
-                        ? "rgba(239, 68, 68, 0.3)"
-                        : "rgba(251, 191, 36, 0.3)"
+                          ? "rgba(239, 68, 68, 0.3)"
+                          : "rgba(251, 191, 36, 0.3)"
                     }`,
                     color: postHogStatus.includes("✅")
                       ? "#4ade80"
                       : postHogStatus.includes("❌")
-                      ? "#f87171"
-                      : "#fbbf24",
+                        ? "#f87171"
+                        : "#fbbf24",
                   }}
                 >
                   {postHogStatus}

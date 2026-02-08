@@ -470,7 +470,7 @@ const RecipePageContent = memo(() => {
               className="space-y-6"
             >
               {/* Hero Image Section - Visible through navbar */}
-              <div className="relative w-full aspect-video sm:aspect-[21/9] -mt-16 sm:-mt-20 mb-4 sm:mb-6">
+              <div className="relative w-full aspect-video sm:aspect-[21/9] -mt-16 sm:-mt-20 mb-4 sm:mb-4 sm:mb-6">
                 <Image
                   src={recipeInfo?.image || recipe?.image || "/hero-image.webp"}
                   alt={recipeInfo?.title || recipe?.title || "Recipe"}
@@ -504,7 +504,7 @@ const RecipePageContent = memo(() => {
                         </div>
 
                         {/* Key Info Badges */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4 sm:mb-6">
                           {/* Calories */}
                           {(() => {
                             const caloriesNutrient =
@@ -1673,7 +1673,7 @@ const RecipePageContent = memo(() => {
 
                               {/* Caloric Breakdown */}
                               {recipeInfo.nutrition.caloricBreakdown && (
-                                <div className="mb-6">
+                                <div className="mb-4 sm:mb-6">
                                   <h4 className="text-md font-semibold text-white mb-3">
                                     Caloric Breakdown
                                   </h4>
@@ -1733,7 +1733,7 @@ const RecipePageContent = memo(() => {
 
                               {/* Weight Per Serving */}
                               {recipeInfo.nutrition.weightPerServing && (
-                                <div className="mb-6">
+                                <div className="mb-4 sm:mb-6">
                                   <h4 className="text-md font-semibold text-white mb-3 flex items-center gap-2">
                                     <Scale className="h-4 w-4 text-green-400" />
                                     Weight Per Serving
@@ -1757,7 +1757,7 @@ const RecipePageContent = memo(() => {
                               {/* Key Nutrients */}
                               {recipeInfo.nutrition.nutrients &&
                                 recipeInfo.nutrition.nutrients.length > 0 && (
-                                  <div className="mb-6">
+                                  <div className="mb-4 sm:mb-6">
                                     <h4 className="text-md font-semibold text-white mb-3">
                                       Key Nutrients
                                     </h4>
@@ -1800,7 +1800,7 @@ const RecipePageContent = memo(() => {
                               {/* Properties */}
                               {recipeInfo.nutrition.properties &&
                                 recipeInfo.nutrition.properties.length > 0 && (
-                                  <div className="mb-6">
+                                  <div className="mb-4 sm:mb-6">
                                     <h4 className="text-md font-semibold text-white mb-3 flex items-center gap-2">
                                       <FlaskConical className="h-4 w-4 text-green-400" />
                                       Properties

@@ -52,7 +52,7 @@ const BlogPostDetail = memo(({ slug, className = "" }: BlogPostDetailProps) => {
           <Skeleton className="h-6 w-1/2" />
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-64 w-full mb-6" />
+          <Skeleton className="h-64 w-full mb-4 sm:mb-6" />
           <Skeleton className="h-4 w-full mb-2" />
           <Skeleton className="h-4 w-full mb-2" />
           <Skeleton className="h-4 w-3/4" />

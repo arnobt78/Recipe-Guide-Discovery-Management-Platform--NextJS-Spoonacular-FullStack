@@ -42,7 +42,11 @@ import {
   useRemoveFavouriteRecipe,
 } from "../../hooks/useRecipes";
 import { usePostHog } from "../../hooks/usePostHog";
-import { Recipe, SearchRecipesResponse, WeatherSuggestionsResponse } from "../../types";
+import {
+  Recipe,
+  SearchRecipesResponse,
+  WeatherSuggestionsResponse,
+} from "../../types";
 import { toast } from "sonner";
 import { ChefHat, Cloud } from "lucide-react";
 import SearchResultsMetadata from "../search/SearchResultsMetadata";
@@ -50,14 +54,14 @@ import { Badge } from "../ui/badge";
 
 // Code splitting: Lazy load large components that are conditionally rendered
 const CollectionManager = lazy(
-  () => import("../collections/CollectionManager")
+  () => import("../collections/CollectionManager"),
 );
 const CollectionDetailView = lazy(
-  () => import("../collections/CollectionDetailView")
+  () => import("../collections/CollectionDetailView"),
 );
 const MealPlanner = lazy(() => import("../meal-planning/MealPlanner"));
 const ShoppingListGenerator = lazy(
-  () => import("../shopping/ShoppingListGenerator")
+  () => import("../shopping/ShoppingListGenerator"),
 );
 
 /**
@@ -67,10 +71,11 @@ const AppContent = () => {
   // Track if component is mounted to prevent hydration mismatches
   // React Query cache can cause server/client mismatch, so we render search results only after mount
   const [isMounted, setIsMounted] = useState(false);
-  
+
   // Weather state - stores weather data from WeatherWidget in hero section
   // Weather recipes are displayed in the tab content area
-  const [weatherData, setWeatherData] = useState<WeatherSuggestionsResponse | null>(null);
+  const [weatherData, setWeatherData] =
+    useState<WeatherSuggestionsResponse | null>(null);
   const [isWeatherLoading, setIsWeatherLoading] = useState(false);
   const [weatherError, setWeatherError] = useState<Error | null>(null);
   const [searchMode, setSearchMode] = useState<"search" | "weather">("search");
@@ -78,18 +83,21 @@ const AppContent = () => {
   useEffect(() => {
     setIsMounted(true);
   }, []);
-  
+
   // Handle weather data changes from WeatherWidget
-  const handleWeatherDataChange = useCallback((
-    data: WeatherSuggestionsResponse | null, 
-    isLoading: boolean, 
-    error: Error | null
-  ) => {
-    setWeatherData(data);
-    setIsWeatherLoading(isLoading);
-    setWeatherError(error);
-  }, []);
-  
+  const handleWeatherDataChange = useCallback(
+    (
+      data: WeatherSuggestionsResponse | null,
+      isLoading: boolean,
+      error: Error | null,
+    ) => {
+      setWeatherData(data);
+      setIsWeatherLoading(isLoading);
+      setWeatherError(error);
+    },
+    [],
+  );
+
   // Handle search mode change from HeroSearchSection
   const handleSearchModeChange = useCallback((mode: "search" | "weather") => {
     setSearchMode(mode);
@@ -138,7 +146,7 @@ const AppContent = () => {
     return (
       trimmed.length > 15 ||
       naturalLanguageIndicators.some((indicator) =>
-        trimmed.toLowerCase().includes(indicator)
+        trimmed.toLowerCase().includes(indicator),
       )
     );
   }, [searchTerm]);
@@ -150,7 +158,7 @@ const AppContent = () => {
     error: aiSearchError,
   } = useAISearchRecipes(
     searchTerm,
-    !!searchTerm && selectedTab === "search" && shouldUseAISearch
+    !!searchTerm && selectedTab === "search" && shouldUseAISearch,
   );
 
   // Check if filters are applied (has any filter values)
@@ -158,7 +166,7 @@ const AppContent = () => {
     if (!searchFilters || Object.keys(searchFilters).length === 0) return false;
     // Check if any filter has a value (not empty/undefined)
     return Object.values(searchFilters).some(
-      (value) => value !== undefined && value !== null && value !== ""
+      (value) => value !== undefined && value !== null && value !== "",
     );
   }, [searchFilters]);
 
@@ -174,7 +182,7 @@ const AppContent = () => {
       (!!searchTerm || hasActiveFilters),
     searchFilters && Object.keys(searchFilters).length > 0
       ? searchFilters
-      : undefined
+      : undefined,
   );
 
   // Use AI search results if AI search was used, otherwise use regular search
@@ -229,7 +237,7 @@ const AppContent = () => {
       const error = searchError as Error & { code?: number };
       if (error?.code === 402 || error?.message?.includes("points limit")) {
         toast.error(
-          "Daily API limit reached. Please try again later or upgrade your plan."
+          "Daily API limit reached. Please try again later or upgrade your plan.",
         );
       } else if (
         error?.message?.includes("AI search") ||
@@ -260,7 +268,7 @@ const AppContent = () => {
       // Small delay to ensure DOM is ready and content is rendered
       const scrollTimer = setTimeout(() => {
         const favouritesContent = document.querySelector(
-          "[data-favourites-content]"
+          "[data-favourites-content]",
         );
         if (favouritesContent) {
           favouritesContent.scrollIntoView({
@@ -342,7 +350,7 @@ const AppContent = () => {
         ? (searchResponse as SearchRecipesResponse)?.message ||
           "Daily API limit reached. Please try again later."
         : "",
-    [searchResponse]
+    [searchResponse],
   );
 
   // Memoized event handlers
@@ -355,7 +363,7 @@ const AppContent = () => {
       // Track search in PostHog
       trackSearch(searchTerm.trim());
     },
-    [searchTerm, setCurrentPage, trackSearch]
+    [searchTerm, setCurrentPage, trackSearch],
   );
 
   const handleViewMoreClick = useCallback(() => {
@@ -370,7 +378,7 @@ const AppContent = () => {
           "🍳 Hey there, food explorer! 👋 To save your favourite recipes, please login first. It's quick and easy! Just click the Login button above and let's get cooking! 🚀",
           {
             duration: 5000,
-          }
+          },
         );
         return;
       }
@@ -381,12 +389,12 @@ const AppContent = () => {
         addFavouriteMutation.mutate(recipe);
       }
     },
-    [isAuthenticated, addFavouriteMutation, removeFavouriteMutation]
+    [isAuthenticated, addFavouriteMutation, removeFavouriteMutation],
   );
 
   return (
     <div
-      className="min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-slate-900 flex flex-col"
+      className="min-h-screen min-w-0 w-full overflow-x-hidden bg-gradient-to-br from-slate-900 via-green-900 to-slate-900 flex flex-col"
       style={{
         backgroundImage: "url(/recipe-bg-4.avif)",
         backgroundSize: "cover",
@@ -418,8 +426,8 @@ const AppContent = () => {
       </HeroHeader>
 
       {/* Main Content - Flex grow to fill remaining space, full width with inner constraint */}
-      <div className="w-full flex-1">
-        <div className="max-w-9xl mx-auto px-2 sm:px-4 md:px-6 xl:px-8 py-4">
+      <div className="w-full min-w-0 flex-1 overflow-hidden">
+        <div className="max-w-9xl w-full mx-auto px-2 sm:px-4 md:px-6 xl:px-8 py-4 min-w-0">
           {/* Tab Navigation */}
           <TabNavigation value={selectedTab} onValueChange={setSelectedTab} />
 
@@ -465,7 +473,8 @@ const AppContent = () => {
                       {/* Weather Recipe Suggestions */}
                       {weatherData && !isWeatherLoading && !weatherError && (
                         <>
-                          {weatherData.suggestions && weatherData.suggestions.length > 0 ? (
+                          {weatherData.suggestions &&
+                          weatherData.suggestions.length > 0 ? (
                             <div className="space-y-4">
                               <div className="flex items-center justify-between">
                                 <h3 className="text-lg font-semibold text-white">
@@ -483,7 +492,7 @@ const AppContent = () => {
                             </div>
                           ) : weatherData.apiLimitReached ? (
                             <Card className="bg-gradient-to-br from-amber-900/30 to-orange-900/30 border-amber-500/30">
-                              <CardContent className="p-6 text-center">
+                              <CardContent className="p-4 sm:p-6 text-center">
                                 <div className="space-y-3">
                                   <div className="p-3 bg-amber-500/20 rounded-lg inline-block mx-auto">
                                     <Cloud className="h-8 w-8 text-amber-400 mx-auto" />
@@ -496,28 +505,31 @@ const AppContent = () => {
                                       "Daily API limit reached. Recipe suggestions will be available tomorrow."}
                                   </p>
                                   <p className="text-xs text-gray-400 mt-2">
-                                    Weather data is still available above. You can still
-                                    search for recipes manually using the search bar!
+                                    Weather data is still available above. You
+                                    can still search for recipes manually using
+                                    the search bar!
                                   </p>
                                 </div>
                               </CardContent>
                             </Card>
                           ) : !weatherData.weather ? (
                             // No location set yet - show instructions
-                            <Card className="bg-gradient-to-br from-blue-900/30 to-cyan-900/30 border-blue-500/30 p-6 sm:p-8">
+                            <Card className="bg-gradient-to-br from-blue-900/30 to-cyan-900/30 border-blue-500/30 p-4 sm:p-6">
                               <div className="space-y-4">
-                                <div className="flex items-start gap-4">
-                                  <div className="p-3 bg-blue-500/20 rounded-lg flex-shrink-0">
+                                <div className="flex items-center gap-3 min-w-0">
+                                  <div className="p-3 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl flex-shrink-0 flex items-center">
                                     <Cloud className="h-6 w-6 sm:h-8 sm:w-8 text-blue-400" />
                                   </div>
-                                  <div className="flex-1">
-                                    <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">
+                                  <div className="flex flex-col min-w-0 flex-1">
+                                    <h3 className="text-base sm:text-lg font-bold bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent text-start break-words mb-3">
                                       Weather-Based Recipe Suggestions
                                     </h3>
-                                    <p className="text-gray-300 text-sm sm:text-base leading-relaxed mb-4">
-                                      Enter your city above or allow location access to get
-                                      AI-powered recipe suggestions perfect for your current weather!
-                                      Hot day? Get refreshing salads. Cold and rainy? Warm soups await!
+                                    <p className="text-gray-300 text-sm sm:text-base leading-relaxed mb-4 break-words">
+                                      Enter your city above or allow location
+                                      access to get AI-powered recipe
+                                      suggestions perfect for your current
+                                      weather! Hot day? Get refreshing salads.
+                                      Cold and rainy? Warm soups await!
                                     </p>
                                   </div>
                                 </div>
@@ -526,7 +538,7 @@ const AppContent = () => {
                           ) : (
                             // Weather loaded but no suggestions
                             <Card className="bg-gradient-to-br from-blue-900/30 to-cyan-900/30 border-blue-500/30">
-                              <CardContent className="p-6 text-center">
+                              <CardContent className="p-4 sm:p-6 text-center">
                                 <div className="space-y-3">
                                   <div className="p-3 bg-blue-500/20 rounded-lg inline-block mx-auto">
                                     <Cloud className="h-8 w-8 text-blue-400 mx-auto" />
@@ -535,7 +547,8 @@ const AppContent = () => {
                                     No Weather Suggestions Available
                                   </h3>
                                   <p className="text-sm text-gray-300">
-                                    Try refreshing or check your location settings.
+                                    Try refreshing or check your location
+                                    settings.
                                   </p>
                                 </div>
                               </CardContent>
@@ -546,20 +559,22 @@ const AppContent = () => {
 
                       {/* No data yet - show placeholder */}
                       {!weatherData && !isWeatherLoading && !weatherError && (
-                        <Card className="bg-gradient-to-br from-blue-900/30 to-cyan-900/30 border-blue-500/30 p-6 sm:p-8">
+                        <Card className="bg-gradient-to-br from-blue-900/30 to-cyan-900/30 border-blue-500/30 p-4 sm:p-6">
                           <div className="space-y-4">
-                            <div className="flex items-start gap-4">
-                              <div className="p-3 bg-blue-500/20 rounded-lg flex-shrink-0">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="p-3 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl flex-shrink-0 flex items-center">
                                 <Cloud className="h-6 w-6 sm:h-8 sm:w-8 text-blue-400" />
                               </div>
-                              <div className="flex-1">
-                                <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">
+                              <div className="flex flex-col min-w-0 flex-1">
+                                <h3 className="text-base sm:text-lg font-bold bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent text-start break-words mb-3">
                                   Weather-Based Recipe Suggestions
                                 </h3>
-                                <p className="text-gray-300 text-sm sm:text-base leading-relaxed mb-4">
-                                  Enter your city above or allow location access to get
-                                  AI-powered recipe suggestions perfect for your current weather!
-                                  Hot day? Get refreshing salads. Cold and rainy? Warm soups await!
+                                <p className="text-gray-300 text-sm sm:text-base leading-relaxed mb-4 break-words">
+                                  Enter your city above or allow location access
+                                  to get AI-powered recipe suggestions perfect
+                                  for your current weather! Hot day? Get
+                                  refreshing salads. Cold and rainy? Warm soups
+                                  await!
                                 </p>
                               </div>
                             </div>
@@ -570,30 +585,35 @@ const AppContent = () => {
                   )}
 
                   {/* Default Instructions - Show when search mode is active and no search term */}
-                  {isMounted && searchMode === "search" && !searchTerm.trim() && !hasActiveFilters && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="w-full mx-auto"
-                    >
-                      <Card className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-purple-500/30 p-6 sm:p-8">
-                        <div className="space-y-4">
-                          <div className="flex items-start gap-4">
-                            <div className="p-3 bg-purple-500/20 rounded-lg flex-shrink-0">
-                              <ChefHat className="h-6 w-6 sm:h-8 sm:w-8 text-purple-400" />
-                            </div>
-                            <div className="flex-1">
-                              <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">
+                  {isMounted &&
+                    searchMode === "search" &&
+                    !searchTerm.trim() &&
+                    !hasActiveFilters && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="w-full mx-auto"
+                      >
+                        <Card className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-purple-500/30 p-4 sm:p-6 min-w-0 overflow-hidden">
+                          <div className="space-y-4">
+                            {/* Icon inline beside title - same as Recipe Search */}
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="p-3 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl flex-shrink-0 flex items-center">
+                                <ChefHat className="h-6 w-6 sm:h-8 sm:w-8 text-purple-400" />
+                              </div>
+                              <h3 className="text-base sm:text-lg font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent text-start break-words">
                                 Discover Amazing Recipes
                               </h3>
-                              <p className="text-gray-300 text-sm sm:text-base leading-relaxed mb-4">
-                                Use the search bar above to find your perfect
-                                recipe! Search through thousands of delicious
-                                recipes from around the world by ingredients,
-                                cuisine, dietary preferences, or simply type
-                                what you&apos;re craving! Use natural language
-                                for smarter AI-powered searches.
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-gray-300 text-sm sm:text-base leading-relaxed mb-4 break-words">
+                                  Use the search bar above to find your perfect
+                                  recipe! Search through thousands of delicious
+                                  recipes from around the world by ingredients,
+                                  cuisine, dietary preferences, or simply type
+                                  what you&apos;re craving! Use natural language
+                                  for smarter AI-powered searches.
                               </p>
                               <div className="space-y-2">
                                 <p className="text-sm font-semibold text-purple-300 mb-2">
@@ -626,13 +646,14 @@ const AppContent = () => {
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </Card>
-                    </motion.div>
-                  )}
+                        </Card>
+                      </motion.div>
+                    )}
 
                   {/* Error Message - Only show in search mode */}
-                  {searchMode === "search" && <ErrorMessage message={apiError} />}
+                  {searchMode === "search" && (
+                    <ErrorMessage message={apiError} />
+                  )}
 
                   {/* API Limit Reached Message - Only show in search mode */}
                   {searchMode === "search" &&
@@ -640,7 +661,7 @@ const AppContent = () => {
                     "apiLimitReached" in searchResponse &&
                     searchResponse.apiLimitReached && (
                       <Card className="bg-gradient-to-br from-amber-900/30 to-orange-900/30 border-amber-500/30">
-                        <CardContent className="p-6 text-center">
+                        <CardContent className="p-4 sm:p-6 text-center">
                           <div className="space-y-3">
                             <div className="p-3 bg-amber-500/20 rounded-lg inline-block mx-auto">
                               <ChefHat className="h-8 w-8 text-amber-400 mx-auto" />
@@ -711,7 +732,7 @@ const AppContent = () => {
                         recipes.length === 0 ? (
                         // Empty state when no results found
                         <Card className="bg-gradient-to-br from-slate-800/50 to-purple-900/30 border-purple-500/30">
-                          <CardContent className="p-8 text-center">
+                          <CardContent className="p-4 sm:p-8 text-center">
                             <div className="space-y-4">
                               <div className="p-4 bg-purple-500/20 rounded-full inline-block mx-auto">
                                 <ChefHat className="h-8 w-8 text-purple-400 mx-auto" />
@@ -720,15 +741,15 @@ const AppContent = () => {
                                 {hasActiveFilters
                                   ? "No recipes found with these filters"
                                   : searchTerm.trim()
-                                  ? `No recipes found for "${searchTerm}"`
-                                  : "No recipes found"}
+                                    ? `No recipes found for "${searchTerm}"`
+                                    : "No recipes found"}
                               </h3>
                               <p className="text-sm text-gray-400">
                                 {hasActiveFilters
                                   ? "Try adjusting your filters or search for something else."
                                   : searchTerm.trim()
-                                  ? "Try a different search term or browse our recipe collection."
-                                  : "Start searching to discover amazing recipes!"}
+                                    ? "Try a different search term or browse our recipe collection."
+                                    : "Start searching to discover amazing recipes!"}
                               </p>
                               {hasActiveFilters && (
                                 <div className="pt-4">
@@ -737,7 +758,7 @@ const AppContent = () => {
                                       setSearchFilters({});
                                       setCurrentPage(1);
                                       toast.success(
-                                        "Filters cleared. Showing all results."
+                                        "Filters cleared. Showing all results.",
                                       );
                                     }}
                                     variant="outline"

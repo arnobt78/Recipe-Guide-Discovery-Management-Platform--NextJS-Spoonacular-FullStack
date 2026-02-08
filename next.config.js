@@ -1,12 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  webpack: (config, { isServer }) => {
-    config.ignoreWarnings = [
-      { module: /node_modules\/@opentelemetry\/instrumentation/ },
-    ];
-    return config;
-  },
   typescript: {
     // Ignore type errors during build - Next.js type generation issue
     // The code is correct, this is a Next.js internal type checking quirk

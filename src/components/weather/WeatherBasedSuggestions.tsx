@@ -64,7 +64,7 @@ const WeatherBasedSuggestions = memo(
     const queryClient = useQueryClient();
     const { data, isLoading, error, refetch } = useWeatherSuggestions(
       location,
-      location !== null
+      location !== null,
     );
     const { data: favouriteRecipes = [] } = useFavouriteRecipes();
     const addFavourite = useAddFavouriteRecipe();
@@ -84,11 +84,11 @@ const WeatherBasedSuggestions = memo(
           },
           (_error) => {
             setLocationError(
-              "Unable to get your location. Please enter a city name."
+              "Unable to get your location. Please enter a city name.",
             );
             setUseGeolocation(false);
             toast.error("Location access denied. Please enter a city name.");
-          }
+          },
         );
       }
     }, [useGeolocation]);
@@ -131,7 +131,7 @@ const WeatherBasedSuggestions = memo(
     const handleFavouriteToggle = useCallback(
       (
         recipe: { id: number; title: string; image: string; imageType: string },
-        isFavourite: boolean
+        isFavourite: boolean,
       ) => {
         if (isFavourite) {
           removeFavourite.mutate(recipe as Recipe, {
@@ -147,7 +147,7 @@ const WeatherBasedSuggestions = memo(
           });
         }
       },
-      [addFavourite, removeFavourite]
+      [addFavourite, removeFavourite],
     );
 
     return (
@@ -164,7 +164,7 @@ const WeatherBasedSuggestions = memo(
                   <CardTitle className="text-lg font-bold bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent text-start">
                     Weather-Based Suggestions
                   </CardTitle>
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-gray-400 text-start">
                     Recipes perfect for your current weather
                   </p>
                 </div>
@@ -390,7 +390,7 @@ const WeatherBasedSuggestions = memo(
         )}
       </div>
     );
-  }
+  },
 );
 
 WeatherBasedSuggestions.displayName = "WeatherBasedSuggestions";

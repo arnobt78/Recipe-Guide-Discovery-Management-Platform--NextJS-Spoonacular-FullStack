@@ -1,9 +1,9 @@
 /**
  * Skeleton Loading Component for Recipe Detail Card/Page
- * 
+ *
  * Matches exact dimensions and layout of RecipeDetailCard and RecipePage components
  * Used during loading states for consistent UI
- * 
+ *
  * Features:
  * - Exact dimension matching for hero image, badges, tabs, and content
  * - Responsive design (phone-screen and sm:screen)
@@ -16,7 +16,7 @@ import { Skeleton } from "../ui/skeleton";
 
 /**
  * Skeleton Recipe Detail Component (Memoized for performance)
- * 
+ *
  * Exact dimension matching for recipe detail loading state
  */
 const SkeletonRecipeDetail = memo(() => {
@@ -33,7 +33,7 @@ const SkeletonRecipeDetail = memo(() => {
       <Card className="glow-card border-purple-500/30">
         <CardContent className="p-4 sm:p-6">
           {/* Tabs Skeleton - Responsive grid (matches RecipePage dynamic grid) */}
-          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-2 mb-6">
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-2 mb-4 sm:mb-6">
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
@@ -44,10 +44,10 @@ const SkeletonRecipeDetail = memo(() => {
           </div>
 
           {/* Data Source Note Skeleton */}
-          <Skeleton className="h-20 w-full mb-6 rounded-lg" />
+          <Skeleton className="h-20 w-full mb-4 sm:mb-6 rounded-lg" />
 
           {/* Key Info Badges Skeleton - Responsive grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4 sm:mb-6">
             <Skeleton className="h-20 w-full" />
             <Skeleton className="h-20 w-full" />
             <Skeleton className="h-20 w-full" />
@@ -55,7 +55,7 @@ const SkeletonRecipeDetail = memo(() => {
           </div>
 
           {/* Summary Content Skeleton */}
-          <div className="space-y-4 mb-6">
+          <div className="space-y-4 mb-4 sm:mb-6">
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-5/6" />
@@ -66,13 +66,13 @@ const SkeletonRecipeDetail = memo(() => {
           </div>
 
           {/* Additional Info Cards Skeleton */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 sm:mb-6">
             <Skeleton className="h-24 w-full" />
             <Skeleton className="h-24 w-full" />
           </div>
 
           {/* Source Link Card Skeleton */}
-          <Skeleton className="h-32 w-full mb-6 rounded-lg" />
+          <Skeleton className="h-32 w-full mb-4 sm:mb-6 rounded-lg" />
 
           {/* Similar Recipes Skeleton */}
           <Skeleton className="h-64 w-full rounded-lg" />
@@ -85,4 +85,3 @@ const SkeletonRecipeDetail = memo(() => {
 SkeletonRecipeDetail.displayName = "SkeletonRecipeDetail";
 
 export default SkeletonRecipeDetail;
-

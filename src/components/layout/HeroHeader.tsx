@@ -47,7 +47,7 @@ const HeroHeader = memo(
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className={`relative w-full ${
+        className={`relative w-full min-w-0 overflow-hidden ${
           hasChildren
             ? "min-h-[500px] sm:min-h-[550px]"
             : "h-[50vh] min-h-[400px] max-h-[600px]"
@@ -115,8 +115,8 @@ const HeroHeader = memo(
         </div>
 
         {/* Content overlay */}
-        <div className="relative z-10 h-full flex flex-col items-center justify-center py-8">
-          <div className="text-center px-2 sm:px-4 md:px-6 xl:px-8 max-w-9xl mx-auto">
+        <div className="relative z-10 h-full flex flex-col items-center justify-center py-8 w-full min-w-0 overflow-hidden">
+          <div className="text-center px-2 sm:px-4 md:px-6 xl:px-8 max-w-9xl w-full mx-auto">
             {/* Innovative subtitle with modern typography */}
             {subtitle && (
               <motion.div
@@ -127,7 +127,7 @@ const HeroHeader = memo(
               >
                 {/* Main subtitle with gradient text effect */}
                 <motion.h2
-                  className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black tracking-tight mb-4 sm:mb-6"
+                  className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tight mb-4 sm:mb-4 sm:mb-6 break-words"
                   style={{
                     background:
                       "linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #8b5cf6 100%)",
@@ -193,7 +193,9 @@ const HeroHeader = memo(
             )}
 
             {/* Children (Search Section) */}
-            {children && <div className="mt-6 sm:mt-8 w-full">{children}</div>}
+            {children && (
+              <div className="mt-6 sm:mt-8 w-full min-w-0">{children}</div>
+            )}
           </div>
         </div>
 
@@ -201,7 +203,7 @@ const HeroHeader = memo(
         <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-slate-900 via-purple-900/50 to-transparent" />
       </motion.section>
     );
-  }
+  },
 );
 
 HeroHeader.displayName = "HeroHeader";
