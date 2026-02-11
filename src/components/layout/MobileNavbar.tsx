@@ -7,6 +7,7 @@ import { Button } from "../ui/button";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -125,6 +126,9 @@ const MobileNavbar = memo(({ onLoginClick, onRegisterClick }: MobileNavbarProps)
           <SheetTitle className="text-white text-left font-bold gradient-text">
             Menu
           </SheetTitle>
+          <SheetDescription className="sr-only">
+            Navigation links for pages, recipe tabs, and account.
+          </SheetDescription>
         </SheetHeader>
         <div className="flex flex-col gap-6 mt-6 overflow-y-auto max-h-[calc(100vh-120px)]">
           {/* Main Navigation */}

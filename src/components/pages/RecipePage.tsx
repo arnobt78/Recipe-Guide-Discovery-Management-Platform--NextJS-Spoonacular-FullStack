@@ -63,7 +63,7 @@ import {
   Share2,
   Menu,
 } from "lucide-react";
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Recipe } from "@/types";
 import {
   capitalizeWords,
@@ -399,6 +399,9 @@ const RecipePageContent = memo(() => {
           className="w-full max-w-[280px] sm:max-w-sm p-0 border-l border-green-500/20 bg-slate-900/95 backdrop-blur-sm overflow-hidden flex flex-col"
         >
           <SheetTitle className="sr-only">Recipe tabs</SheetTitle>
+          <SheetDescription className="sr-only">
+            Navigate between recipe summary, details, analysis, and more.
+          </SheetDescription>
           <div className="flex-1 overflow-y-auto min-h-0">
             <RecipeDetailSidebar
               embedded

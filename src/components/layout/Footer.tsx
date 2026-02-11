@@ -17,7 +17,7 @@ import { memo, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChefHat, Heart, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
 
 type FooterPage = "about" | "privacy" | "terms" | null;
 
@@ -152,6 +152,9 @@ const Footer = memo(() => {
                     {pageContents[selectedPage].title}
                   </span>
                 </DialogTitle>
+                <DialogDescription className="sr-only">
+                  {pageContents[selectedPage].description}
+                </DialogDescription>
               </DialogHeader>
 
               <motion.div
