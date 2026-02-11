@@ -462,14 +462,27 @@ const RecipeVideoPlayer = memo(
                                         </div>
                                       )}
                                     </div>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => setSelectedVideo(null)}
-                                      className="text-gray-400 hover:text-white"
-                                    >
-                                      <X className="h-4 w-4" />
-                                    </Button>
+                                    <div className="flex items-center gap-1">
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setSelectedVideo(null)}
+                                        className="text-gray-400 hover:text-white"
+                                        aria-label="Close player"
+                                      >
+                                        <X className="h-4 w-4" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleDeleteVideo(video)}
+                                        disabled={removeVideo.isPending}
+                                        className="text-red-400 hover:text-red-300 hover:bg-red-500/20"
+                                        aria-label="Delete video"
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </div>
                                   </div>
                                 </div>
                               </CardContent>

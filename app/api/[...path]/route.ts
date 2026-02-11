@@ -5945,6 +5945,49 @@ export async function DELETE(
       return new NextResponse(null, { status: 204, headers: getCorsHeaders() });
     }
 
+    // Route: /api/recipes/videos/[id] (DELETE) - Delete recipe video
+    if (
+      path[0] === "recipes" &&
+      path[1] === "videos" &&
+      path[2] &&
+      path.length === 3
+    ) {
+      const auth = await requireAuth(request);
+      if (auth.response) return auth.response;
+
+      const videoId = path[2];
+
+      try {
+        const existing = await prisma.recipeVideo.findFirst({
+          where: {
+            id: videoId,
+            userId: auth.userId!,
+          },
+        });
+
+        if (!existing) {
+          return jsonResponse({ error: "Video not found" }, 404);
+        }
+
+        await prisma.recipeVideo.delete({
+          where: { id: videoId },
+        });
+
+        return jsonResponse({ success: true, message: "Video deleted" });
+      } catch (error) {
+        console.error("Delete recipe video error:", error);
+        return jsonResponse(
+          {
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to delete recipe video",
+          },
+          500
+        );
+      }
+    }
+
     // Route: /api/recipes/images (DELETE)
     if (path[0] === "recipes" && path[1] === "images") {
       const auth = await requireAuth(request);
