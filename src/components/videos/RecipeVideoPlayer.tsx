@@ -14,7 +14,7 @@
  * Following DEVELOPMENT_RULES.md: Reusable component, centralized hooks
  */
 
-import { memo, useState, useCallback } from "react";
+import { memo, useState, useCallback, useEffect } from "react";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -211,17 +211,21 @@ const RecipeVideoPlayer = memo(
     // Confirm delete
     const confirmDelete = useCallback(() => {
       if (videoToDelete) {
+        const deletedId = videoToDelete.id;
         removeVideo.mutate(
           { videoId: videoToDelete.id, recipeId },
           {
             onSuccess: () => {
               setDeleteDialogOpen(false);
               setVideoToDelete(null);
+              if (selectedVideo?.id === deletedId) {
+                setSelectedVideo(null);
+              }
             },
           },
         );
       }
-    }, [videoToDelete, recipeId, removeVideo]);
+    }, [videoToDelete, selectedVideo?.id, recipeId, removeVideo]);
 
     // Get embed URL for video
     const getEmbedUrl = useCallback((video: RecipeVideo): string | null => {
@@ -245,6 +249,14 @@ const RecipeVideoPlayer = memo(
       }
       return null;
     }, []);
+
+    // Show YouTube/embed directly when videos load (no overlay click required)
+    useEffect(() => {
+      if (videos.length > 0 && selectedVideo === null) {
+        const firstWithEmbed = videos.find((v) => getEmbedUrl(v));
+        setSelectedVideo(firstWithEmbed ?? videos[0]);
+      }
+    }, [videos, selectedVideo, getEmbedUrl]);
 
     return (
       <Card
