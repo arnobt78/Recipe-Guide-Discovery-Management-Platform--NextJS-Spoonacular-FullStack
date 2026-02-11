@@ -202,19 +202,20 @@ const Navbar = memo(() => {
   };
 
   /**
-   * Handle logout - smooth transition without page refresh
+   * Handle logout - smooth transition without page refresh.
+   * Clears session (AuthContext), then switches to home tab and cleans URL
+   * so we don't stay on auth-only tabs (favourites, collections, meal-plan, shopping).
    */
   const handleLogout = async () => {
-    // Set logging out state to track for goodbye message
     setIsLoggingOut(true);
-    // Immediately clear persisted auth state to prevent skeleton on next render
     if (typeof window !== "undefined") {
       localStorage.removeItem(AUTH_STATE_KEY);
       localStorage.removeItem(OAUTH_PENDING_KEY);
     }
     setWasAuthenticated(false);
-    // Perform logout (no page refresh)
     await logout();
+    // Switch to search (home) tab and remove ?tab= from URL via replaceState — no full reload
+    setSelectedTab("search");
   };
 
   return (
