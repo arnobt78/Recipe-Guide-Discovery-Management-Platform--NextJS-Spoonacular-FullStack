@@ -107,13 +107,19 @@ const RecipeImageGallery = memo(({ recipe }: RecipeImageGalleryProps) => {
     }
   }, [imageToDelete, removeRecipeImage]);
 
-  // Group images by type
-  // Map database types (main, other) to UI types (final, custom) for display
+  // Normalize DB types to UI types (API stores "final"->"main", "custom"->"other")
+  const normalizeImageType = (type: string): "step" | "final" | "ingredient" | "custom" => {
+    if (type === "main") return "final";
+    if (type === "other") return "custom";
+    return type as "step" | "final" | "ingredient" | "custom";
+  };
+
+  // Group images by type (use normalized type so DB "main"/"other" show in UI)
   const imagesByType = {
-    final: images.filter((img) => img.imageType === "final"),
-    step: images.filter((img) => img.imageType === "step"),
-    ingredient: images.filter((img) => img.imageType === "ingredient"),
-    custom: images.filter((img) => img.imageType === "custom"),
+    final: images.filter((img) => normalizeImageType(img.imageType) === "final"),
+    step: images.filter((img) => normalizeImageType(img.imageType) === "step"),
+    ingredient: images.filter((img) => normalizeImageType(img.imageType) === "ingredient"),
+    custom: images.filter((img) => normalizeImageType(img.imageType) === "custom"),
   };
 
   const imageTypeLabels: Record<string, string> = {
