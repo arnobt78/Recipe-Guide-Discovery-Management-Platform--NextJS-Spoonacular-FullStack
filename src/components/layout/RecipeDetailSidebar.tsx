@@ -14,7 +14,7 @@
 "use client";
 
 import { memo } from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import Link from "next/link";
 import {
   UtensilsCrossed,
@@ -200,7 +200,7 @@ const RecipeDetailSidebar = memo(
           href="/"
           className="flex items-center gap-2 px-4 py-4 border-b border-green-500/20 hover:bg-slate-800/50 transition-colors"
         >
-          <Image
+          <SafeImage
             src="/chef.svg"
             alt="Recipe App Logo"
             width={32}

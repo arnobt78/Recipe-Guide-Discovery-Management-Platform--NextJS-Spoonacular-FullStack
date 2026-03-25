@@ -8,7 +8,7 @@
  */
 
 import { motion } from "framer-motion";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 
 interface LoadingStateProps {
   message?: string;
@@ -28,7 +28,7 @@ const LoadingState = ({
       className={`text-center text-purple-300 text-xl py-12 ${className}`}
     >
       <div className="flex items-center justify-center gap-2">
-        <Image
+        <SafeImage
           src={icon}
           alt="Loading"
           width={24}

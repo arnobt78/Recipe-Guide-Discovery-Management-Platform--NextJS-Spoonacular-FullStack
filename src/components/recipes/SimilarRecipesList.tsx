@@ -15,7 +15,7 @@
  */
 
 import { memo, useCallback } from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import { useRouter } from "next/navigation";
 import { SimilarRecipe } from "../../types";
 import { Card } from "../ui/card";
@@ -94,7 +94,7 @@ const SimilarRecipesList = memo(
                 {/* Recipe Image - full width on phone, thumbnail on sm+ */}
                 {imageUrl && (
                   <div className="relative flex-shrink-0 w-full sm:w-24 sm:min-w-[6rem] aspect-video sm:aspect-square sm:h-24 rounded-lg overflow-hidden border border-blue-500/20">
-                    <Image
+                    <SafeImage
                       src={imageUrl}
                       alt={similarRecipe.title}
                       fill

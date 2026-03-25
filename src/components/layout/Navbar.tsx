@@ -18,7 +18,7 @@
  */
 
 import { memo, useState, useEffect, useRef } from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "../ui/button";
@@ -234,7 +234,7 @@ const Navbar = memo(() => {
             transition={{ delay: 0.1 }}
             className="flex items-center gap-3"
           >
-            <Image
+            <SafeImage
               src="/chef.svg"
               alt="Recipe App Logo"
               width={40}

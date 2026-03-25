@@ -13,7 +13,7 @@
  */
 
 import { memo, useState, useCallback, useMemo, useEffect } from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import {
@@ -243,7 +243,7 @@ const ShoppingListGenerator = memo((_props: ShoppingListGeneratorProps) => {
                             <div className="flex items-start gap-3 min-w-0">
                               {recipe.image && (
                                 <div className="relative w-16 h-16 rounded overflow-hidden">
-                                  <Image
+                                  <SafeImage
                                     src={recipe.image}
                                     alt={recipe.title}
                                     fill

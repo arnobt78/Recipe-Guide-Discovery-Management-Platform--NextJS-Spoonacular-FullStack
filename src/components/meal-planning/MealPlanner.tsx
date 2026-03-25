@@ -13,7 +13,7 @@
  */
 
 import { memo, useState, useCallback, useMemo, useEffect } from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -362,7 +362,7 @@ const MealPlanner = memo((_props: MealPlannerProps) => {
                             <div className="flex items-start gap-2">
                               {meal.recipeImage && (
                                 <div className="relative flex-shrink-0 w-12 h-12 rounded overflow-hidden">
-                                  <Image
+                                  <SafeImage
                                     src={meal.recipeImage}
                                     alt={meal.recipeTitle}
                                     fill

@@ -13,7 +13,7 @@
  */
 
 import { memo, useState, useCallback, useEffect } from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -245,7 +245,7 @@ const RecipeImageGallery = memo(({ recipe }: RecipeImageGalleryProps) => {
                               >
                                 <Card className="glow-card border-purple-500/30 overflow-hidden">
                                   <div className="aspect-square relative">
-                                    <Image
+                                    <SafeImage
                                       src={image.imageUrl}
                                       alt={
                                         image.caption || `Recipe ${type} image`

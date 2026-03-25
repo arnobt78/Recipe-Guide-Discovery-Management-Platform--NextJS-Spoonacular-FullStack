@@ -139,6 +139,7 @@ Desktop.ini
 .certificates/
 
 # Project Documentation
+docs/
 PROJECT_PLAN.md
 SPOONACULAR_API_DOCS.md
 DEVELOPMENT_RULES.md

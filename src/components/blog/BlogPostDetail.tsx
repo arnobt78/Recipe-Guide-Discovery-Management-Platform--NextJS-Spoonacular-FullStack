@@ -14,7 +14,7 @@
  */
 
 import { memo } from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import { useRouter } from "next/navigation";
 import { useBlogPost } from "../../hooks/useBlogPosts";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -113,7 +113,7 @@ const BlogPostDetail = memo(({ slug, className = "" }: BlogPostDetailProps) => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-white/30 pb-4">
           <div className="flex items-center gap-3">
             {post.author?.avatar ? (
-              <Image
+              <SafeImage
                 src={post.author.avatar}
                 alt={post.author.name}
                 width={32}
@@ -121,7 +121,7 @@ const BlogPostDetail = memo(({ slug, className = "" }: BlogPostDetailProps) => {
                 className="rounded-full"
               />
             ) : (
-              <Image
+              <SafeImage
                 src={fallbackAvatarUrl}
                 alt={post.author?.name || "Author"}
                 width={32}
@@ -160,7 +160,7 @@ const BlogPostDetail = memo(({ slug, className = "" }: BlogPostDetailProps) => {
         {/* Featured Image with Category Badge Overlay */}
         {post.featuredImage && (
           <div className="relative w-full h-64 sm:h-80 md:h-96 mb-8 rounded-lg overflow-hidden">
-            <Image
+            <SafeImage
               src={post.featuredImage.url}
               alt={post.featuredImage.title || post.title}
               fill

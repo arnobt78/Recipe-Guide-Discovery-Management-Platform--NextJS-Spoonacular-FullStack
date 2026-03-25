@@ -10,7 +10,7 @@
  */
 
 import { memo, useMemo, useEffect, useState, lazy, Suspense } from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import { motion } from "framer-motion";
 import {
   useRecipeSummary,
@@ -338,7 +338,7 @@ const RecipeDetailCard = memo(
               {/* Left Side - Recipe Image */}
               <div className="lg:w-1/3 relative overflow-hidden flex-shrink-0">
                 <div className="aspect-square lg:aspect-auto lg:h-[600px] relative">
-                  <Image
+                  <SafeImage
                     src={recipe.image || "/hero-image.webp"}
                     alt={recipe.title}
                     fill
@@ -1213,7 +1213,7 @@ const RecipeDetailCard = memo(
                                                               >
                                                                 {ing.image && (
                                                                   <div className="relative w-6 h-6 rounded overflow-hidden">
-                                                                    <Image
+                                                                    <SafeImage
                                                                       src={`https://img.spoonacular.com/ingredients_100x100/${ing.image}`}
                                                                       alt={
                                                                         ing.name
@@ -1271,7 +1271,7 @@ const RecipeDetailCard = memo(
                                                               >
                                                                 {eq.image && (
                                                                   <div className="relative w-6 h-6 rounded overflow-hidden">
-                                                                    <Image
+                                                                    <SafeImage
                                                                       src={`https://img.spoonacular.com/equipment_100x100/${eq.image}`}
                                                                       alt={
                                                                         eq.name
@@ -1378,7 +1378,7 @@ const RecipeDetailCard = memo(
                                               {/* Product Image */}
                                               {product.imageUrl && (
                                                 <div className="relative flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden border border-purple-500/20">
-                                                  <Image
+                                                  <SafeImage
                                                     src={product.imageUrl}
                                                     alt={product.title}
                                                     fill

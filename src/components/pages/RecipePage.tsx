@@ -26,7 +26,7 @@ import {
   useCallback,
 } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import { motion } from "framer-motion";
 import {
   useRecipeSummary,
@@ -526,7 +526,7 @@ const RecipePageContent = memo(() => {
             >
               {/* 3. Hero image - below title row on phone, below navbar on sm+ */}
               <div className="relative w-full min-w-0 aspect-video sm:aspect-[21/9] mb-4 sm:mb-6 overflow-hidden rounded-xl">
-                <Image
+                <SafeImage
                   src={recipeInfo?.image || recipe?.image || "/hero-image.webp"}
                   alt={recipeInfo?.title || recipe?.title || "Recipe"}
                   fill
@@ -1170,7 +1170,7 @@ const RecipePageContent = memo(() => {
                                           {/* Image: full-width thumb on phone, small left on sm+ */}
                                           {ingredient.image && (
                                             <div className="relative flex-shrink-0 w-full sm:w-16 aspect-video sm:aspect-square sm:h-16 rounded-lg overflow-hidden border border-orange-500/20">
-                                              <Image
+                                              <SafeImage
                                                 src={getIngredientImageUrl(
                                                   ingredient.image,
                                                 )}
@@ -1356,7 +1356,7 @@ const RecipePageContent = memo(() => {
                                                               >
                                                                 {ing.image && (
                                                                   <span className="relative inline-block w-4 h-4 rounded overflow-hidden flex-shrink-0">
-                                                                    <Image
+                                                                    <SafeImage
                                                                       src={getIngredientImageUrl(
                                                                         ing.image,
                                                                       )}
@@ -1421,7 +1421,7 @@ const RecipePageContent = memo(() => {
                                                               >
                                                                 {eq.image && (
                                                                   <span className="relative inline-block w-4 h-4 rounded overflow-hidden flex-shrink-0">
-                                                                    <Image
+                                                                    <SafeImage
                                                                       src={getEquipmentImageUrl(
                                                                         eq.image,
                                                                       )}
@@ -1542,7 +1542,7 @@ const RecipePageContent = memo(() => {
                                           >
                                             {product.imageUrl && (
                                               <div className="relative flex-shrink-0 w-full sm:w-24 aspect-video sm:aspect-square sm:h-24 rounded-lg overflow-hidden border border-purple-500/20">
-                                                <Image
+                                                <SafeImage
                                                   src={product.imageUrl}
                                                   alt={product.title}
                                                   fill

@@ -10,7 +10,7 @@
  */
 
 import { memo } from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import { Card } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { CheckCircle2, AlertCircle, Info, ShoppingCart } from "lucide-react";
@@ -67,7 +67,7 @@ const IngredientMatchDetails = memo(
                   {/* Ingredient Image */}
                   {ingredient.image && (
                     <div className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border border-green-500/20">
-                      <Image
+                      <SafeImage
                         src={getIngredientImageUrl(ingredient.image)}
                         alt={ingredient.name}
                         fill
@@ -147,7 +147,7 @@ const IngredientMatchDetails = memo(
                   {/* Ingredient Image */}
                   {ingredient.image && (
                     <div className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border border-orange-500/20">
-                      <Image
+                      <SafeImage
                         src={getIngredientImageUrl(ingredient.image)}
                         alt={ingredient.name}
                         fill
@@ -232,7 +232,7 @@ const IngredientMatchDetails = memo(
                   {/* Ingredient Image */}
                   {ingredient.image && (
                     <div className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border border-blue-500/20">
-                      <Image
+                      <SafeImage
                         src={getIngredientImageUrl(ingredient.image)}
                         alt={ingredient.name}
                         fill

@@ -52,7 +52,7 @@ import {
 import { RecipeVideo } from "../../types";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import ConfirmationDialog from "../common/ConfirmationDialog";
 import EmptyState from "../common/EmptyState";
 import { Skeleton } from "../ui/skeleton";
@@ -496,7 +496,7 @@ const RecipeVideoPlayer = memo(
                                 >
                                   {thumbnailUrl &&
                                   !thumbnailFailedIds.has(video.id) ? (
-                                    <Image
+                                    <SafeImage
                                       src={thumbnailUrl}
                                       alt={video.title || "Video thumbnail"}
                                       fill

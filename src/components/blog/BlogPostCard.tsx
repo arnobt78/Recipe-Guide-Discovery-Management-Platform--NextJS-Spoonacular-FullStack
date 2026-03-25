@@ -12,7 +12,7 @@
  */
 
 import { memo } from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import { useRouter } from "next/navigation";
 import { BlogPost } from "../../types";
 import { Calendar, ArrowRight } from "lucide-react";
@@ -64,7 +64,7 @@ const BlogPostCard = memo(({ post, index = 0, onClick }: BlogPostCardProps) => {
         {/* Featured Image */}
         {post.featuredImage && (
           <div className="relative overflow-hidden rounded-t-[28px] h-48">
-            <Image
+            <SafeImage
               src={post.featuredImage.url}
               alt={post.featuredImage.title || post.title}
               fill
@@ -112,7 +112,7 @@ const BlogPostCard = memo(({ post, index = 0, onClick }: BlogPostCardProps) => {
           <div className="flex items-center justify-between pt-4 border-t border-white/30">
             <div className="flex items-center gap-3">
               {post.author?.avatar ? (
-                <Image
+                <SafeImage
                   src={post.author.avatar}
                   alt={post.author.name}
                   width={32}
@@ -120,7 +120,7 @@ const BlogPostCard = memo(({ post, index = 0, onClick }: BlogPostCardProps) => {
                   className="rounded-full"
                 />
               ) : (
-                <Image
+                <SafeImage
                   src={fallbackAvatarUrl}
                   alt={post.author?.name || "Author"}
                   width={32}

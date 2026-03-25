@@ -13,7 +13,7 @@
  */
 
 import { memo, ReactNode } from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import { motion } from "framer-motion";
 
 interface HeroHeaderProps {
@@ -55,7 +55,7 @@ const HeroHeader = memo(
       >
         {/* Full-width hero image */}
         <div className="absolute inset-0">
-          <Image
+          <SafeImage
             src={imageSrc}
             alt="Delicious Recipes"
             fill

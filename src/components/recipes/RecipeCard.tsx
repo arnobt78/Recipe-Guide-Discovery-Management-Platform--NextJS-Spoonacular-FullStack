@@ -12,7 +12,7 @@
  */
 
 import { memo, useMemo } from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import { useRouter } from "next/navigation";
 import { Recipe } from "../../types";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
@@ -134,7 +134,7 @@ const RecipeCard = memo(
         <Card className="glow-card group h-full flex flex-col overflow-hidden min-h-[320px]">
           {/* Recipe Image */}
           <div className="relative overflow-hidden rounded-t-lg h-48">
-            <Image
+            <SafeImage
               src={recipe.image || "/hero-image.webp"}
               alt={recipe.title}
               fill

@@ -22,7 +22,7 @@ import HeroHeader from "../layout/HeroHeader";
 import { Badge } from "../ui/badge";
 import { Calendar, User, Sparkles } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 
 /**
  * Blog Post Hero Content Component
@@ -60,7 +60,7 @@ function BlogPostHeroContent({ slug }: { slug: string }) {
         {post.author && (
           <Badge className="bg-teal-500/20 backdrop-blur-sm text-teal-200 border-teal-400/30 px-4 py-2 h-10 text-sm inline-flex items-center gap-2">
             {post.author.avatar ? (
-              <Image
+              <SafeImage
                 src={post.author.avatar}
                 alt={post.author.name}
                 width={24}

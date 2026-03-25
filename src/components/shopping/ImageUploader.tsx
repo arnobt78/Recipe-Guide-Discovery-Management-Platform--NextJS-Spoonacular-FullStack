@@ -13,7 +13,7 @@
  */
 
 import { memo, useState, useCallback, useRef, useMemo } from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import { useUploadImage } from "../../hooks/useRecipeImages";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
@@ -226,7 +226,7 @@ const ImageUploader = memo(
             ) : (
               <div className="space-y-4">
                 <div className="relative w-full h-64 rounded-lg overflow-hidden">
-                  <Image
+                  <SafeImage
                     src={preview}
                     alt="Preview"
                     fill

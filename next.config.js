@@ -1,4 +1,13 @@
 /** @type {import('next').NextConfig} */
+
+const securityHeaders = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-XSS-Protection", value: "1; mode=block" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), geolocation=()" },
+];
+
 const nextConfig = {
   reactStrictMode: true,
   typescript: {
@@ -58,11 +67,33 @@ const nextConfig = {
         hostname: "img.youtube.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "openweathermap.org",
+        pathname: "/**",
+      },
     ],
   },
   // Environment variables that should be available on the client
   env: {
     // These will be available via process.env in both server and client
+  },
+  async headers() {
+    return [
+      {
+        source: "/_next/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/:path*",
+        headers: securityHeaders,
+      },
+    ];
   },
 };
 

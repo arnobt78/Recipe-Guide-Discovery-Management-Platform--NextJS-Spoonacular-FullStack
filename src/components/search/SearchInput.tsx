@@ -13,7 +13,7 @@
  */
 
 import { memo, useState, useEffect, useRef, useCallback } from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import { useRouter } from "next/navigation";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
@@ -207,7 +207,7 @@ const SearchInput = memo(
                         {/* Recipe Image */}
                         {imageUrl && (
                           <div className="relative flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden border border-purple-500/20">
-                            <Image
+                            <SafeImage
                               src={imageUrl}
                               alt={recipe.title}
                               fill
