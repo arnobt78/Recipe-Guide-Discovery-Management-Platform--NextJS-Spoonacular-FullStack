@@ -49,3 +49,15 @@ CRUD → notifyCrud(domain) → Redis seq + insights cache bust
 ## Key env
 
 `DATABASE_URL`, `UPSTASH_REDIS_*`, `NEXTAUTH_*`, `GOOGLE_ID`/`GOOGLE_SECRET`, `API_KEY`
+
+## Audit status (2026-06)
+
+| Check | Status |
+|-------|--------|
+| test + lint + build | pass |
+| Auth0 removed | pass |
+| SSE + notifyCrud (22 mutations) | pass |
+| SSR force-dynamic (7 pages) | pass |
+| Vitest TC-0020 | pass |
+| Commit | `174dd3a` on main |
+| Post-deploy | archive Sentry Case 1; remove Auth0 env from Vercel |
