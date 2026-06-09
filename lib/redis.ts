@@ -120,6 +120,18 @@ export async function getTTL(key: string): Promise<number> {
 }
 
 /**
+ * Increment a numeric cache key (event sequence counter).
+ */
+export async function incrCache(key: string): Promise<number> {
+  try {
+    return await redis.incr(key);
+  } catch (error) {
+    console.error("Redis incr error:", error);
+    return 0;
+  }
+}
+
+/**
  * Cache key generators for consistent naming
  */
 export const cacheKeys = {

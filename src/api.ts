@@ -936,10 +936,7 @@ export const removeFavouriteRecipe = async (recipe: Recipe): Promise<void> => {
 
 /**
  * Get authentication headers for authenticated requests
- * Includes user ID and Auth0 JWT access token
- *
- * Note: AuthContext stores both userId and access token in localStorage
- * Backend should validate the JWT token for proper security
+ * Includes NextAuth session user id via x-user-id header for API routes.
  */
 export async function getAuthHeaders(): Promise<HeadersInit> {
   const headers: HeadersInit = {

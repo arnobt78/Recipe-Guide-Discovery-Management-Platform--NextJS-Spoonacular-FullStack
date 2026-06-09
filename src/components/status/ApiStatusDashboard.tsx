@@ -31,6 +31,10 @@ type StatusResponse = {
   timestamp: string;
 };
 
+interface ApiStatusDashboardProps {
+  initialStatus?: StatusResponse | null;
+}
+
 const ApiStatusSkeleton = () => (
   <div className="space-y-6">
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -86,9 +90,13 @@ const ApiStatusSkeleton = () => (
   </div>
 );
 
-const ApiStatusDashboard = memo(() => {
-  const [data, setData] = useState<StatusResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+const ApiStatusDashboard = memo(function ApiStatusDashboard({
+  initialStatus,
+}: ApiStatusDashboardProps) {
+  const [data, setData] = useState<StatusResponse | null>(
+    initialStatus ?? null,
+  );
+  const [isLoading, setIsLoading] = useState(!initialStatus);
   const [isFetching, setIsFetching] = useState(false);
 
   const fetchStatus = async () => {
@@ -105,12 +113,16 @@ const ApiStatusDashboard = memo(() => {
   };
 
   useEffect(() => {
-    fetchStatus();
+    if (!initialStatus) {
+      fetchStatus();
+    }
     const id = setInterval(() => {
       setIsFetching(true);
       fetchStatus();
     }, 30000);
     return () => clearInterval(id);
+    // initialStatus only used to skip first fetch on SSR hydrate
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleRefresh = () => {
@@ -159,7 +171,7 @@ const ApiStatusDashboard = memo(() => {
             className="bg-blue-500/10 border-blue-500/30 text-blue-300"
           >
             <Clock className="h-3 w-3 mr-1" />
-            10s refresh
+            30s refresh
           </Badge>
           <Button
             variant="outline"

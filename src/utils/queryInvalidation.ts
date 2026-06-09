@@ -1,84 +1,46 @@
 /**
  * React Query Cache Invalidation Utilities
- * 
- * Centralized functions for invalidating React Query caches when data changes.
- * This ensures all related queries update immediately after mutations.
- * 
- * Following the pattern from REACT_QUERY_SETUP_GUIDE.md
+ *
+ * Centralized invalidation for mutations + SSE realtime sync (invalidateByAppEvent).
  */
 
 import { QueryClient } from "@tanstack/react-query";
 
-/**
- * Invalidate business insights query
- * Call this when any user data changes that affects global statistics:
- * - User registration/deletion
- * - Favourites added/removed
- * - Collections created/updated/deleted
- * - Collection items added/removed
- * - Meal plans created/updated/deleted
- * - Shopping lists created/updated/deleted
- * - Notes created/updated/deleted
- * - Filter presets created/updated/deleted
- * - Images added/removed
- * - Videos added/removed
- * 
- * @param queryClient - React Query client instance
- */
+/** Mirrors lib/realtime/types.ts — client-safe duplicate */
+export type AppEventType =
+  | "insights"
+  | "favourites"
+  | "collections"
+  | "mealPlan"
+  | "shoppingList"
+  | "notes"
+  | "images"
+  | "videos"
+  | "filterPresets"
+  | "user"
+  | "recipes";
+
 export function invalidateBusinessInsights(queryClient: QueryClient) {
-  queryClient.invalidateQueries({
-    queryKey: ["business", "insights"],
-  });
+  queryClient.invalidateQueries({ queryKey: ["business", "insights"] });
 }
 
-/**
- * Invalidate all recipe-related queries
- * Call this when:
- * - Recipe is added/removed from favourites
- * - Recipe data changes
- * 
- * @param queryClient - React Query client instance
- */
 export function invalidateRecipeQueries(queryClient: QueryClient) {
-  // Invalidate all recipe queries (search, favourites, summary)
-  queryClient.invalidateQueries({
-    queryKey: ["recipes"],
-    exact: false, // Match all queries starting with ["recipes"]
-  });
+  queryClient.invalidateQueries({ queryKey: ["recipes"], exact: false });
 }
 
-/**
- * Invalidate favourites queries only
- * Call this when:
- * - Recipe is added/removed from favourites
- * 
- * @param queryClient - React Query client instance
- */
 export function invalidateFavouritesQueries(queryClient: QueryClient) {
-  queryClient.invalidateQueries({
-    queryKey: ["recipes", "favourites"],
-  });
+  queryClient.invalidateQueries({ queryKey: ["recipes", "favourites"] });
 }
 
-/**
- * Invalidate search queries
- * Call this when:
- * - Search results need to be refreshed
- * 
- * @param queryClient - React Query client instance
- * @param searchTerm - Optional search term to invalidate specific query
- */
 export function invalidateSearchQueries(
   queryClient: QueryClient,
-  searchTerm?: string
+  searchTerm?: string,
 ) {
   if (searchTerm) {
-    // Invalidate specific search query
     queryClient.invalidateQueries({
       queryKey: ["recipes", "search", searchTerm],
     });
   } else {
-    // Invalidate all search queries
     queryClient.invalidateQueries({
       queryKey: ["recipes", "search"],
       exact: false,
@@ -86,35 +48,93 @@ export function invalidateSearchQueries(
   }
 }
 
-/**
- * Invalidate recipe summary query
- * Call this when:
- * - Recipe details need to be refreshed
- * 
- * @param queryClient - React Query client instance
- * @param recipeId - Recipe ID to invalidate
- */
 export function invalidateRecipeSummary(
   queryClient: QueryClient,
-  recipeId: string
+  recipeId: string,
 ) {
   queryClient.invalidateQueries({
     queryKey: ["recipes", "summary", recipeId],
   });
 }
 
-/**
- * Invalidate all collection queries
- * Call this when:
- * - Collection is created/updated/deleted
- * - Recipe is added/removed from collection
- * 
- * @param queryClient - React Query client instance
- */
 export function invalidateCollectionsQueries(queryClient: QueryClient) {
-  queryClient.invalidateQueries({
-    queryKey: ["collections"],
-    exact: false,
-  });
+  queryClient.invalidateQueries({ queryKey: ["collections"], exact: false });
+  queryClient.invalidateQueries({ queryKey: ["collection"], exact: false });
 }
 
+export function invalidateMealPlanQueries(queryClient: QueryClient) {
+  queryClient.invalidateQueries({ queryKey: ["meal-plan"], exact: false });
+}
+
+export function invalidateShoppingListQueries(queryClient: QueryClient) {
+  queryClient.invalidateQueries({ queryKey: ["shopping-lists"] });
+  queryClient.invalidateQueries({ queryKey: ["shopping-list"], exact: false });
+}
+
+export function invalidateNotesQueries(queryClient: QueryClient) {
+  queryClient.invalidateQueries({ queryKey: ["recipe-note"], exact: false });
+}
+
+export function invalidateImagesQueries(queryClient: QueryClient) {
+  queryClient.invalidateQueries({ queryKey: ["recipe-images"], exact: false });
+}
+
+export function invalidateVideosQueries(queryClient: QueryClient) {
+  queryClient.invalidateQueries({ queryKey: ["recipes", "videos"], exact: false });
+}
+
+export function invalidateFilterPresetsQueries(queryClient: QueryClient) {
+  queryClient.invalidateQueries({ queryKey: ["filters", "presets"], exact: false });
+}
+
+/**
+ * SSE + cross-tab sync — maps server AppEventType to React Query keys.
+ */
+export function invalidateByAppEvent(
+  queryClient: QueryClient,
+  type: AppEventType,
+): void {
+  switch (type) {
+    case "insights":
+    case "user":
+      invalidateBusinessInsights(queryClient);
+      break;
+    case "favourites":
+      invalidateFavouritesQueries(queryClient);
+      invalidateBusinessInsights(queryClient);
+      break;
+    case "collections":
+      invalidateCollectionsQueries(queryClient);
+      invalidateBusinessInsights(queryClient);
+      break;
+    case "mealPlan":
+      invalidateMealPlanQueries(queryClient);
+      invalidateBusinessInsights(queryClient);
+      break;
+    case "shoppingList":
+      invalidateShoppingListQueries(queryClient);
+      invalidateBusinessInsights(queryClient);
+      break;
+    case "notes":
+      invalidateNotesQueries(queryClient);
+      invalidateBusinessInsights(queryClient);
+      break;
+    case "images":
+      invalidateImagesQueries(queryClient);
+      invalidateBusinessInsights(queryClient);
+      break;
+    case "videos":
+      invalidateVideosQueries(queryClient);
+      invalidateBusinessInsights(queryClient);
+      break;
+    case "filterPresets":
+      invalidateFilterPresetsQueries(queryClient);
+      invalidateBusinessInsights(queryClient);
+      break;
+    case "recipes":
+      invalidateRecipeQueries(queryClient);
+      break;
+    default:
+      break;
+  }
+}

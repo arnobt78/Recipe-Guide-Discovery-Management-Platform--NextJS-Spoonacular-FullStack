@@ -6,7 +6,26 @@ import ApiStatusDashboard from "../status/ApiStatusDashboard";
 import Navbar from "../layout/Navbar";
 import Footer from "../layout/Footer";
 
-export default function ApiStatusPageClient() {
+export type ApiStatusInitialData = {
+  endpoints: Array<{
+    path: string;
+    method: string;
+    description: string;
+    status: number;
+    ok: boolean;
+    latency: number;
+    error?: string;
+  }>;
+  timestamp: string;
+};
+
+interface ApiStatusPageClientProps {
+  initialStatus?: ApiStatusInitialData;
+}
+
+export default function ApiStatusPageClient({
+  initialStatus,
+}: ApiStatusPageClientProps) {
   return (
     <AuthProvider>
       <RecipeProvider>
@@ -22,7 +41,7 @@ export default function ApiStatusPageClient() {
         >
           <Navbar />
           <main className="flex-1 max-w-9xl mx-auto px-2 sm:px-4 md:px-6 xl:px-8 py-8 w-full">
-            <ApiStatusDashboard />
+            <ApiStatusDashboard initialStatus={initialStatus} />
           </main>
           <Footer />
         </div>

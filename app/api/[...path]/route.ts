@@ -50,11 +50,18 @@ import {
   getBusinessInsightsStats,
   getBusinessInsightsProbe,
 } from "../../../lib/business-insights";
+import { publishAppEvent } from "../../../lib/realtime/publish";
+import type { AppEventType } from "../../../lib/realtime/types";
+import { createAppEventStream, SSE_HEADERS } from "../../../lib/realtime/stream";
 import * as Sentry from "@sentry/nextjs";
 
-/** REQ-0020: bust Redis insights cache after mutations that change global stats */
-async function bustInsightsCache(): Promise<void> {
+/** Publish domain event + bust insights Redis (global stats) */
+async function notifyCrud(domain: AppEventType): Promise<void> {
+  await publishAppEvent(domain);
   await invalidateBusinessInsightsCache();
+  if (domain !== "insights") {
+    await publishAppEvent("insights");
+  }
 }
 
 /**
@@ -427,6 +434,14 @@ export async function GET(
   const searchParams = request.nextUrl.searchParams;
 
   try {
+    // Route: /api/events/stream (GET) — SSE for cross-tab realtime invalidation
+    if (path[0] === "events" && path[1] === "stream" && path.length === 2) {
+      const stream = createAppEventStream();
+      return new Response(stream, {
+        headers: { ...getCorsHeaders(), ...SSE_HEADERS },
+      });
+    }
+
     // Route: /api/status (GET) - Real-time API status for all endpoints
     if (path[0] === "status" && path.length === 1) {
       const base = request.nextUrl.origin;
@@ -3372,7 +3387,7 @@ export async function POST(
           data: { recipeId: recipeIdNum, userId: auth.userId! },
           select: { id: true, recipeId: true, userId: true },
         });
-        await bustInsightsCache();
+        await notifyCrud("favourites");
         return jsonResponse(favouriteRecipe, 201);
       } catch (createError: unknown) {
         const error = createError as Error;
@@ -3435,7 +3450,7 @@ export async function POST(
         },
       });
 
-      await bustInsightsCache();
+      await notifyCrud("collections");
       return jsonResponse(
         {
           ...collection,
@@ -3511,7 +3526,7 @@ export async function POST(
         },
       });
 
-      await bustInsightsCache();
+      await notifyCrud("collections");
       return jsonResponse(
         {
           ...item,
@@ -3632,7 +3647,7 @@ export async function POST(
         },
       });
 
-      await bustInsightsCache();
+      await notifyCrud("mealPlan");
       return jsonResponse(
         {
           ...mealItem,
@@ -3672,7 +3687,7 @@ export async function POST(
         },
       });
 
-      await bustInsightsCache();
+      await notifyCrud("shoppingList");
       return jsonResponse(
         {
           ...shoppingList,
@@ -3898,7 +3913,7 @@ export async function POST(
         },
       });
 
-      await bustInsightsCache();
+      await notifyCrud("images");
       return jsonResponse(
         {
           ...image,
@@ -4677,7 +4692,7 @@ Return ONLY a JSON object with this exact structure:
           },
         });
 
-        await bustInsightsCache();
+        await notifyCrud("filterPresets");
         return jsonResponse(preset, 201);
       } catch (error) {
         console.error("Create filter preset error:", error);
@@ -4760,7 +4775,7 @@ Return ONLY a JSON object with this exact structure:
           },
         });
 
-        await bustInsightsCache();
+        await notifyCrud("filterPresets");
         return jsonResponse(preset);
       } catch (error) {
         console.error("Update filter preset error:", error);
@@ -4806,7 +4821,7 @@ Return ONLY a JSON object with this exact structure:
           where: { id: presetId },
         });
 
-        await bustInsightsCache();
+        await notifyCrud("filterPresets");
         return jsonResponse({
           success: true,
           message: "Filter preset deleted",
@@ -4945,7 +4960,7 @@ Return ONLY a JSON object with this exact structure:
           },
         });
 
-        await bustInsightsCache();
+        await notifyCrud("videos");
         return jsonResponse(video, 201);
       } catch (error) {
         console.error("Create recipe video error:", error);
@@ -4991,7 +5006,7 @@ Return ONLY a JSON object with this exact structure:
           where: { id: videoId },
         });
 
-        await bustInsightsCache();
+        await notifyCrud("videos");
         return jsonResponse({ success: true, message: "Video deleted" });
       } catch (error) {
         console.error("Delete recipe video error:", error);
@@ -5096,7 +5111,7 @@ Return ONLY a JSON object with this exact structure:
         },
       });
 
-      await bustInsightsCache();
+      await notifyCrud("notes");
       return jsonResponse({
         ...note,
         createdAt: note.createdAt.toISOString(),
@@ -5199,7 +5214,7 @@ export async function PUT(
         where: { id: collectionId },
       });
 
-      await bustInsightsCache();
+      await notifyCrud("collections");
       return jsonResponse({
         ...updated,
         createdAt: updated!.createdAt.toISOString(),
@@ -5271,7 +5286,7 @@ export async function PUT(
         data: updates,
       });
 
-      await bustInsightsCache();
+      await notifyCrud("shoppingList");
       return jsonResponse({
         ...updated,
         items:
@@ -5374,7 +5389,7 @@ export async function DELETE(
         await prisma.favouriteRecipes.delete({ where: { id: existing.id } });
       }
 
-      await bustInsightsCache();
+      await notifyCrud("favourites");
       return new NextResponse(null, { status: 204, headers: getCorsHeaders() });
     }
 
@@ -5395,7 +5410,7 @@ export async function DELETE(
         return jsonResponse({ error: "Collection not found" }, 404);
       }
 
-      await bustInsightsCache();
+      await notifyCrud("collections");
       return new NextResponse(null, { status: 204, headers: getCorsHeaders() });
     }
 
@@ -5450,7 +5465,7 @@ export async function DELETE(
         return jsonResponse({ error: "Item not found in collection" }, 404);
       }
 
-      await bustInsightsCache();
+      await notifyCrud("collections");
       return new NextResponse(null, { status: 204, headers: getCorsHeaders() });
     }
 
@@ -5477,7 +5492,7 @@ export async function DELETE(
         where: { id: itemId },
       });
 
-      await bustInsightsCache();
+      await notifyCrud("mealPlan");
       return new NextResponse(null, { status: 204, headers: getCorsHeaders() });
     }
 
@@ -5508,7 +5523,7 @@ export async function DELETE(
         where: { id: String(id) },
       });
 
-      await bustInsightsCache();
+      await notifyCrud("shoppingList");
       return new NextResponse(null, { status: 204, headers: getCorsHeaders() });
     }
 
@@ -5540,7 +5555,7 @@ export async function DELETE(
           where: { id: videoId },
         });
 
-        await bustInsightsCache();
+        await notifyCrud("videos");
         return jsonResponse({ success: true, message: "Video deleted" });
       } catch (error) {
         console.error("Delete recipe video error:", error);
@@ -5583,7 +5598,7 @@ export async function DELETE(
         where: { id: String(id) },
       });
 
-      await bustInsightsCache();
+      await notifyCrud("images");
       return new NextResponse(null, { status: 204, headers: getCorsHeaders() });
     }
 
@@ -5618,7 +5633,7 @@ export async function DELETE(
         return jsonResponse({ error: "Note not found" }, 404);
       }
 
-      await bustInsightsCache();
+      await notifyCrud("notes");
       return new NextResponse(null, { status: 204, headers: getCorsHeaders() });
     }
 

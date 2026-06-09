@@ -19,6 +19,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { signIn } from "next-auth/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { invalidateBusinessInsights } from "../../utils/queryInvalidation";
 import {
   Dialog,
   DialogContent,
@@ -61,6 +63,7 @@ export function RegisterDialog({
   onSwitchToLogin,
 }: RegisterDialogProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const queryClient = useQueryClient();
 
   /**
    * Form setup with react-hook-form
@@ -113,7 +116,8 @@ export function RegisterDialog({
           return;
         }
 
-        // Success - show success message and redirect to login
+        // Success — bust client insights cache (server publishes SSE + Redis)
+        invalidateBusinessInsights(queryClient);
         toast.success(
           result.message || "Account created successfully! Please sign in."
         );
@@ -134,7 +138,7 @@ export function RegisterDialog({
         setIsLoading(false);
       }
     },
-    [onOpenChange, onSwitchToLogin, reset]
+    [onOpenChange, onSwitchToLogin, reset, queryClient]
   );
 
   /**

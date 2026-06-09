@@ -1,5 +1,7 @@
 import ApiDocsPageClient from "@/components/pages/ApiDocsPage";
 
+export const dynamic = "force-dynamic";
+
 export default function ApiDocsPage() {
   return <ApiDocsPageClient />;
 }

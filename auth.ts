@@ -12,6 +12,7 @@ import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "./lib/prisma";
 import bcrypt from "bcryptjs";
+import { createLocalUser } from "./lib/user-registration";
 
 /**
  * NextAuth configuration
@@ -99,25 +100,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           });
 
           if (!existingUser) {
-            // Create new user for OAuth sign-in
-            const userId = `google_${user.email.split("@")[0]}_${Date.now()}`;
-            await prisma.user.create({
-              data: {
-                id: userId,
-                email: user.email.trim().toLowerCase(),
-                name: user.name || profile?.name || null,
-                picture: user.image || (profile as { picture?: string })?.picture || null,
-                password: null, // OAuth users don't have passwords
-              },
+            const created = await createLocalUser({
+              email: user.email,
+              name: user.name || profile?.name || null,
+              picture:
+                user.image ||
+                (profile as { picture?: string })?.picture ||
+                null,
+              provider: "google",
             });
-            const { invalidateBusinessInsightsCache } = await import(
-              "./lib/redis-cache"
-            );
-            await invalidateBusinessInsightsCache();
-            console.log(`✅ Google OAuth user created: ${user.email} (ID: ${userId})`);
-            
-            // Update the user object with the new ID for JWT
-            user.id = userId;
+            user.id = created.id;
           } else {
             // User exists - update their info and use existing ID
             await prisma.user.update({

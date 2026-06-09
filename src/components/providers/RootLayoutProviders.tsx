@@ -20,6 +20,7 @@ import { SessionProvider } from "next-auth/react";
 import { Toaster } from "sonner";
 import ErrorBoundary from "../common/ErrorBoundary";
 import { PostHogProvider } from "./PostHogProvider";
+import RealtimeProvider from "./RealtimeProvider";
 import { setupCachePersistence } from "../../utils/queryCachePersistence";
 import { setupDevConsole } from "../../utils/devConsole";
 
@@ -139,7 +140,7 @@ export default function RootLayoutProviders({
       <PostHogProvider>
         <SessionProvider>
           <QueryClientProvider client={queryClient}>
-            {children}
+            <RealtimeProvider>{children}</RealtimeProvider>
             <Toaster
               position="bottom-right"
               richColors
