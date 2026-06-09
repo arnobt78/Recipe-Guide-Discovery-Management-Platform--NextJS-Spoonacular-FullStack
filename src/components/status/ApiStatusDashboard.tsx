@@ -109,7 +109,7 @@ const ApiStatusDashboard = memo(() => {
     const id = setInterval(() => {
       setIsFetching(true);
       fetchStatus();
-    }, 10000);
+    }, 30000);
     return () => clearInterval(id);
   }, []);
 

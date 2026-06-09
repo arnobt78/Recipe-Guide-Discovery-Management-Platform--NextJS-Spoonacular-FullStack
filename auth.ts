@@ -110,6 +110,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 password: null, // OAuth users don't have passwords
               },
             });
+            const { invalidateBusinessInsightsCache } = await import(
+              "./lib/redis-cache"
+            );
+            await invalidateBusinessInsightsCache();
             console.log(`✅ Google OAuth user created: ${user.email} (ID: ${userId})`);
             
             // Update the user object with the new ID for JWT

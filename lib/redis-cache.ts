@@ -17,6 +17,8 @@ export { cacheKeys };
 const _DEFAULT_TTL = 60 * 60; // 1 hour in seconds (unused - reserved for future use)
 const RECIPE_TTL = 24 * 60 * 60; // 24 hours for recipe data (rarely changes)
 const SEARCH_TTL = 30 * 60; // 30 minutes for search results (more dynamic)
+/** Aligns with useBusinessInsights staleTime — live stats without hammering DB */
+const BUSINESS_INSIGHTS_TTL = 60;
 
 /**
  * Get cached API response
@@ -135,6 +137,28 @@ export async function invalidateSearchCache(searchTerm: string): Promise<void> {
  * @param ttlSeconds - Optional TTL override
  * @returns Cached or fresh response
  */
+/**
+ * Cached business insights — bust via invalidateBusinessInsightsCache on CRUD.
+ */
+export async function getBusinessInsightsCached<T>(
+  handler: () => Promise<T>,
+): Promise<T> {
+  return withCache(
+    cacheKeys.businessInsights(),
+    handler,
+    BUSINESS_INSIGHTS_TTL,
+  );
+}
+
+/** Call after any mutation that affects global platform statistics. */
+export async function invalidateBusinessInsightsCache(): Promise<void> {
+  try {
+    await deleteCache(cacheKeys.businessInsights());
+  } catch (error) {
+    console.error("Business insights cache invalidation error:", error);
+  }
+}
+
 export async function withCache<T>(
   cacheKey: string,
   handler: () => Promise<T>,

@@ -3,34 +3,37 @@
  *
  * Features:
  * - Fetches global statistics from database
- * - Auto-refresh every 30 seconds for live data
- * - Centralized error handling
+ * - SSR initialData support (REQ-0020)
+ * - Manual refresh + mutation invalidation (no polling)
  *
  * Following REACT_QUERY_SETUP_GUIDE.md patterns:
- * - staleTime: 30 seconds (live data needs frequent updates)
- * - refetchInterval: 30 seconds (auto-refresh for live feel)
- * - refetchOnMount: true
+ * - staleTime: 60 seconds (aligns with Redis TTL)
+ * - refetchOnWindowFocus for tab return refresh
  */
 
 import { useQuery } from "@tanstack/react-query";
 import * as api from "../api";
 import { BusinessInsightsResponse } from "../types";
 
+export interface UseBusinessInsightsOptions {
+  enabled?: boolean;
+  initialData?: BusinessInsightsResponse;
+}
+
 /**
  * Hook to get business insights and statistics
- *
- * @param enabled - Whether to enable the query (default: true)
- * @returns Query result with business insights data
  */
-export function useBusinessInsights(enabled: boolean = true) {
+export function useBusinessInsights(options: UseBusinessInsightsOptions = {}) {
+  const { enabled = true, initialData } = options;
+
   return useQuery<BusinessInsightsResponse, Error>({
     queryKey: ["business", "insights"],
     queryFn: () => api.getBusinessInsights(),
     enabled,
-    staleTime: 30 * 1000, // 30 seconds - live data needs frequent updates
-    refetchInterval: 30 * 1000, // Auto-refresh every 30 seconds
+    initialData,
+    staleTime: 60_000,
     refetchOnMount: true,
-    refetchOnWindowFocus: true, // Refresh when user comes back to tab
+    refetchOnWindowFocus: true,
     retry: 2,
     retryDelay: 1000,
   });

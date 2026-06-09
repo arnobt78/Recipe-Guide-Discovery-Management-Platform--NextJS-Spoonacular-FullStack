@@ -1,24 +1,36 @@
 import BusinessInsightsPageClient from "@/components/pages/BusinessInsightsPage";
+import { getBusinessInsightsStats } from "../../lib/business-insights";
+import { getBusinessInsightsCached } from "../../lib/redis-cache";
+import type { BusinessInsightsResponse } from "@/types";
+
+export const dynamic = "force-dynamic";
 
 /**
  * Business Insights Page (Server Component)
- * 
- * Displays global platform statistics and analytics
- * URL: /business-insights (avoiding blocked keywords like /analytics, /metrics)
- * 
- * This is a Server Component that imports the Client Component
- * for faster initial page load and better SEO
- * 
- * Following DEVELOPMENT_RULES.md: Server/Client component separation
+ *
+ * SSR-hydrates insights data to avoid client double-fetch on first paint (REQ-0020).
  */
-export default function BusinessInsightsPage() {
-  return <BusinessInsightsPageClient />;
+export default async function BusinessInsightsPage() {
+  let initialInsights: BusinessInsightsResponse | undefined;
+
+  try {
+    const insightsData = await getBusinessInsightsCached(() =>
+      getBusinessInsightsStats(),
+    );
+    initialInsights = {
+      success: true,
+      data: insightsData,
+      timestamp: new Date().toISOString(),
+    };
+  } catch (error) {
+    console.error("Business insights SSR fetch error:", error);
+  }
+
+  return <BusinessInsightsPageClient initialInsights={initialInsights} />;
 }
 
-/**
- * Metadata for the page
- */
 export const metadata = {
   title: "Business Insights | FlavorVerse",
-  description: "Real-time platform statistics, user engagement metrics, and business analytics for FlavorVerse recipe platform.",
+  description:
+    "Real-time platform statistics, user engagement metrics, and business analytics for FlavorVerse recipe platform.",
 };

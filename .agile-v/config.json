@@ -1,0 +1,43 @@
+{
+  "project": "recipe-spoonacular",
+  "display_name": "Recipe Guide — Discovery & Management Platform",
+  "cycle": "C1",
+  "standard": "Agile V",
+  "standard_version": "1.4",
+  "repo_url": "https://github.com/arnobt78/Recipe-Guide-Discovery-Management-Platform--NextJS-Spoonacular-FullStack",
+  "live_url": "https://recipe-smart.vercel.app/",
+  "stack": ["Next.js 15", "React 18", "TypeScript", "Prisma", "PostgreSQL", "NextAuth v5", "Spoonacular API"],
+  "authority_matrix": {
+    "Human Gate 1": { "role": "Product Owner / Tech Lead", "required": true },
+    "Human Gate 2": { "role": "Product Owner / Tech Lead", "required": true }
+  },
+  "model_tiers": {
+    "high": ["requirement-architect", "logic-gatekeeper", "build-agent-js"],
+    "medium": ["build-agent-js", "test-designer", "red-team-verifier"],
+    "low": ["compliance-auditor", "documentation-agent"]
+  },
+  "llm_provider_registry": [
+    {
+      "name": "OpenRouter",
+      "env_key": "OPENROUTER_API_KEY",
+      "approved_for": ["ai-features", "non-pii"],
+      "review_date": "2026-03-25"
+    },
+    {
+      "name": "Google Gemini",
+      "env_key": "GOOGLE_GEMINI_API_KEY",
+      "approved_for": ["ai-features", "non-pii"],
+      "review_date": "2026-03-25"
+    },
+    {
+      "name": "Groq",
+      "env_key": "GROQ_LLAMA_API_KEY",
+      "approved_for": ["ai-features", "non-pii"],
+      "review_date": "2026-03-25"
+    }
+  ],
+  "model_versions": {
+    "last_validated": "2026-03-25",
+    "validated_by": "bootstrap"
+  }
+}

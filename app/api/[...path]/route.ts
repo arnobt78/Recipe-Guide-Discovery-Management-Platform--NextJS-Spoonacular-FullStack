@@ -45,8 +45,17 @@ import {
   presetToCloudinaryOptions,
 } from "../../../src/config/upload-presets";
 import { Recipe } from "../../../src/types";
-import { withCache, cacheKeys } from "../../../lib/redis-cache";
+import { withCache, cacheKeys, getBusinessInsightsCached, invalidateBusinessInsightsCache } from "../../../lib/redis-cache";
+import {
+  getBusinessInsightsStats,
+  getBusinessInsightsProbe,
+} from "../../../lib/business-insights";
 import * as Sentry from "@sentry/nextjs";
+
+/** REQ-0020: bust Redis insights cache after mutations that change global stats */
+async function bustInsightsCache(): Promise<void> {
+  await invalidateBusinessInsightsCache();
+}
 
 /**
  * Convert Contentful Rich text document to HTML string
@@ -430,7 +439,7 @@ export async function GET(
         { path: "/api/food/wine/dishes?wine=merlot", method: "GET", description: "Wine Dishes" },
         { path: "/api/food/wine/pairing?food=steak", method: "GET", description: "Wine Pairing" },
         { path: "/api/cms/blog", method: "GET", description: "Blog CMS" },
-        { path: "/api/business-insights", method: "GET", description: "Business Insights" },
+        { path: "/api/business-insights?probe=1", method: "GET", description: "Business Insights" },
       ];
       const results = await Promise.all(
         endpoints.map(async (ep) => {
@@ -3154,480 +3163,19 @@ Return ONLY a JSON array of search query strings, like: ["soup", "stew", "curry"
     // BUSINESS INSIGHTS ROUTES (avoiding blocked keywords)
     // ============================================
 
-    // Route: /api/business-insights (GET) - Get global statistics
+    // Route: /api/business-insights (GET) - Get global statistics (REQ-0020)
     if (path[0] === "business-insights" && path.length === 1) {
+      if (searchParams.get("probe") === "1") {
+        return jsonResponse({
+          success: true,
+          ...getBusinessInsightsProbe(),
+          timestamp: new Date().toISOString(),
+        });
+      }
       try {
-        // Get date ranges for filtering (using UTC to avoid timezone issues)
-        const now = new Date();
-        const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-        const startOfWeek = new Date(startOfToday);
-        startOfWeek.setUTCDate(startOfWeek.getUTCDate() - startOfWeek.getUTCDay());
-        const startOfLastWeek = new Date(startOfWeek);
-        startOfLastWeek.setUTCDate(startOfLastWeek.getUTCDate() - 7);
-        const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-        const startOfLastMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1));
-        const endOfLastMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0));
-
-        // Run all database queries in parallel for performance
-        const [
-          // User statistics
-          totalUsers,
-          newUsersThisMonth,
-          newUsersLastMonth,
-          newUsersThisWeek,
-          newUsersToday,
-          
-          // Recipe statistics
-          totalFavourites,
-          totalCollections,
-          totalCollectionItems,
-          totalMealPlans,
-          totalMealPlanItems,
-          totalShoppingLists,
-          completedShoppingLists,
-          totalNotes,
-          totalFilterPresets,
-          
-          // Content statistics
-          totalRecipeImages,
-          totalRecipeVideos,
-          
-          // Unique recipes saved
-          uniqueRecipesSaved,
-          
-          // Popular recipes (most favourited)
-          popularRecipesByFavourites,
-          
-          // Top contributors
-          topContributorsByFavourites,
-          
-          // Recent activity - all types
-          recentFavourites,
-          recentCollections,
-          recentMealPlans,
-          recentShoppingLists,
-          recentNotes,
-          recentUsers,
-          
-          // Weekly comparison data for trends
-          favouritesThisWeek,
-          favouritesLastWeek,
-          collectionsThisWeek,
-          collectionsLastWeek,
-          mealPlansThisWeek,
-          mealPlansLastWeek,
-        ] = await Promise.all([
-          // User counts
-          prisma.user.count(),
-          prisma.user.count({ where: { createdAt: { gte: startOfMonth } } }),
-          prisma.user.count({ where: { createdAt: { gte: startOfLastMonth, lt: endOfLastMonth } } }),
-          prisma.user.count({ where: { createdAt: { gte: startOfWeek } } }),
-          prisma.user.count({ where: { createdAt: { gte: startOfToday } } }),
-          
-          // Recipe counts
-          prisma.favouriteRecipes.count(),
-          prisma.recipeCollection.count(),
-          prisma.collectionItem.count(),
-          prisma.mealPlan.count(),
-          prisma.mealPlanItem.count(),
-          prisma.shoppingList.count(),
-          prisma.shoppingList.count({ where: { isCompleted: true } }),
-          prisma.recipeNote.count(),
-          prisma.filterPreset.count(),
-          
-          // Content counts
-          prisma.recipeImage.count(),
-          prisma.recipeVideo.count(),
-          
-          // Unique recipes
-          prisma.favouriteRecipes.groupBy({
-            by: ['recipeId'],
-            _count: true,
-          }),
-          
-          // Popular recipes - group by recipeId and count
-          prisma.favouriteRecipes.groupBy({
-            by: ['recipeId'],
-            _count: { recipeId: true },
-            orderBy: { _count: { recipeId: 'desc' } },
-            take: 10,
-          }),
-          
-          // Top contributors - users with most favourites
-          prisma.user.findMany({
-            take: 5,
-            select: {
-              name: true,
-              email: true,
-              createdAt: true,
-              _count: {
-                select: {
-                  favourites: true,
-                  collections: true,
-                  mealPlans: true,
-                },
-              },
-            },
-            orderBy: {
-              favourites: { _count: 'desc' },
-            },
-          }),
-          
-          // Recent activity - all types
-          prisma.favouriteRecipes.findMany({
-            take: 3,
-            orderBy: { createdAt: 'desc' },
-            include: { user: { select: { name: true, email: true } } },
-          }),
-          prisma.recipeCollection.findMany({
-            take: 3,
-            orderBy: { createdAt: 'desc' },
-            include: { user: { select: { name: true, email: true } } },
-          }),
-          prisma.mealPlan.findMany({
-            take: 2,
-            orderBy: { createdAt: 'desc' },
-            include: { user: { select: { name: true, email: true } } },
-          }),
-          prisma.shoppingList.findMany({
-            take: 2,
-            orderBy: { createdAt: 'desc' },
-            include: { user: { select: { name: true, email: true } } },
-          }),
-          prisma.recipeNote.findMany({
-            take: 2,
-            orderBy: { createdAt: 'desc' },
-            include: { user: { select: { name: true, email: true } } },
-          }),
-          prisma.user.findMany({
-            take: 3,
-            orderBy: { createdAt: 'desc' },
-            select: { name: true, email: true, createdAt: true },
-          }),
-          
-          // Weekly comparison counts for trends
-          prisma.favouriteRecipes.count({ where: { createdAt: { gte: startOfWeek } } }),
-          prisma.favouriteRecipes.count({ where: { createdAt: { gte: startOfLastWeek, lt: startOfWeek } } }),
-          prisma.recipeCollection.count({ where: { createdAt: { gte: startOfWeek } } }),
-          prisma.recipeCollection.count({ where: { createdAt: { gte: startOfLastWeek, lt: startOfWeek } } }),
-          prisma.mealPlan.count({ where: { createdAt: { gte: startOfWeek } } }),
-          prisma.mealPlan.count({ where: { createdAt: { gte: startOfLastWeek, lt: startOfWeek } } }),
-        ]);
-
-        // Get collection and meal plan counts for popular recipes
-        const popularRecipeIds = popularRecipesByFavourites.map(r => r.recipeId);
-        
-        const [collectionCounts, mealPlanCounts] = await Promise.all([
-          prisma.collectionItem.groupBy({
-            by: ['recipeId'],
-            where: { recipeId: { in: popularRecipeIds } },
-            _count: { recipeId: true },
-          }),
-          prisma.mealPlanItem.groupBy({
-            by: ['recipeId'],
-            where: { recipeId: { in: popularRecipeIds } },
-            _count: { recipeId: true },
-          }),
-        ]);
-
-        // Build collection and meal plan count maps
-        const collectionCountMap = new Map(collectionCounts.map(c => [c.recipeId, c._count.recipeId]));
-        const mealPlanCountMap = new Map(mealPlanCounts.map(m => [m.recipeId, m._count.recipeId]));
-
-        // Build popular recipes array with all counts and trends
-        const popularRecipes = popularRecipesByFavourites.map((r, index) => {
-          const favCount = r._count.recipeId;
-          const collCount = collectionCountMap.get(r.recipeId) || 0;
-          const mealCount = mealPlanCountMap.get(r.recipeId) || 0;
-          const totalEng = favCount + collCount + mealCount;
-          // Simulate trend based on position (top recipes trending up)
-          const trendDirection = index < 3 ? 'up' : index < 7 ? 'stable' : 'down';
-          return {
-            recipeId: r.recipeId,
-            recipeTitle: `Recipe #${r.recipeId}`,
-            favouriteCount: favCount,
-            collectionCount: collCount,
-            mealPlanCount: mealCount,
-            totalEngagement: totalEng,
-            trendDirection: trendDirection as 'up' | 'down' | 'stable',
-          };
-        });
-
-        // Build top contributors array with activity score
-        const topContributors = topContributorsByFavourites.map(u => {
-          const totalActivity = u._count.favourites + u._count.collections + u._count.mealPlans;
-          // Calculate activity score (0-100 based on activity)
-          const activityScore = Math.min(100, Math.round(totalActivity * 10));
-          return {
-            userName: u.name || 'Anonymous',
-            email: u.email,
-            totalFavourites: u._count.favourites,
-            totalCollections: u._count.collections,
-            totalMealPlans: u._count.mealPlans,
-            joinedAt: u.createdAt.toISOString(),
-            activityScore,
-          };
-        });
-
-        // Build recent activity array with all types
-        const recentActivity = [
-          ...recentFavourites.map(f => ({
-            type: 'favourite' as const,
-            description: `Recipe #${f.recipeId} added to favourites`,
-            timestamp: f.createdAt.toISOString(),
-            userId: f.userId || undefined,
-            userName: f.user?.name || f.user?.email || undefined,
-          })),
-          ...recentCollections.map(c => ({
-            type: 'collection' as const,
-            description: `Collection "${c.name}" created`,
-            timestamp: c.createdAt.toISOString(),
-            userId: c.userId,
-            userName: c.user?.name || c.user?.email || undefined,
-          })),
-          ...recentMealPlans.map(m => ({
-            type: 'meal_plan' as const,
-            description: `Meal plan created for week`,
-            timestamp: m.createdAt.toISOString(),
-            userId: m.userId,
-            userName: m.user?.name || m.user?.email || undefined,
-          })),
-          ...recentShoppingLists.map(s => ({
-            type: 'shopping_list' as const,
-            description: `Shopping list "${s.name}" created`,
-            timestamp: s.createdAt.toISOString(),
-            userId: s.userId,
-            userName: s.user?.name || s.user?.email || undefined,
-          })),
-          ...recentNotes.map(n => ({
-            type: 'note' as const,
-            description: `Note added for Recipe #${n.recipeId}`,
-            timestamp: n.createdAt.toISOString(),
-            userId: n.userId,
-            userName: n.user?.name || n.user?.email || undefined,
-          })),
-          ...recentUsers.map(u => ({
-            type: 'user_signup' as const,
-            description: `New user registered`,
-            timestamp: u.createdAt.toISOString(),
-            userName: u.name || u.email || undefined,
-          })),
-        ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 15);
-
-        // Calculate growth rate
-        const growthRate = newUsersLastMonth > 0 
-          ? Math.round(((newUsersThisMonth - newUsersLastMonth) / newUsersLastMonth) * 100)
-          : newUsersThisMonth > 0 ? 100 : 0;
-
-        // Calculate averages
-        const avgFavouritesPerUser = totalUsers > 0 ? Math.round((totalFavourites / totalUsers) * 10) / 10 : 0;
-        const avgCollectionsPerUser = totalUsers > 0 ? Math.round((totalCollections / totalUsers) * 10) / 10 : 0;
-        const avgItemsPerCollection = totalCollections > 0 ? Math.round((totalCollectionItems / totalCollections) * 10) / 10 : 0;
-        const avgMealsPerPlan = totalMealPlans > 0 ? Math.round((totalMealPlanItems / totalMealPlans) * 10) / 10 : 0;
-        const avgActionsPerUser = totalUsers > 0 
-          ? Math.round(((totalFavourites + totalCollections + totalMealPlans + totalNotes) / totalUsers) * 10) / 10 
-          : 0;
-
-        // Calculate uptime (process uptime)
-        const uptimeSeconds = process.uptime();
-        const uptimeDays = Math.floor(uptimeSeconds / 86400);
-        const uptimeHours = Math.floor((uptimeSeconds % 86400) / 3600);
-        const uptimeMinutes = Math.floor((uptimeSeconds % 3600) / 60);
-        const uptimeString = uptimeDays > 0 
-          ? `${uptimeDays}d ${uptimeHours}h ${uptimeMinutes}m`
-          : `${uptimeHours}h ${uptimeMinutes}m`;
-
-        // Total DB records
-        const totalDbRecords = totalUsers + totalFavourites + totalCollections + totalCollectionItems 
-          + totalMealPlans + totalMealPlanItems + totalShoppingLists + totalNotes 
-          + totalFilterPresets + totalRecipeImages + totalRecipeVideos;
-
-        // Get day of week with most activity (based on recent signups pattern)
-        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        const mostActiveDay = dayNames[new Date().getDay()]; // Simplified - would need more data for accurate calculation
-
-        // Calculate engagement score (0-100)
-        const totalActions = totalFavourites + totalCollections + totalMealPlans + totalNotes + totalShoppingLists;
-        const engagementScore = totalUsers > 0 
-          ? Math.min(100, Math.round((totalActions / totalUsers) * 20))
-          : 0;
-
-        // Calculate retention rate (simplified - users with more than 1 action)
-        const retentionRate = totalUsers > 0 
-          ? Math.min(100, Math.round((Math.min(totalActions, totalUsers) / totalUsers) * 100))
-          : 0;
-
-        // Determine trends
-        const userGrowthTrend = growthRate > 10 ? 'rising' : growthRate < -10 ? 'declining' : 'stable';
-        const engagementTrend = engagementScore > 50 ? 'rising' : engagementScore < 20 ? 'declining' : 'stable';
-
-        // Calculate weekly trends from ACTUAL database data (not random)
-        // Calculate percentage change: ((this week - last week) / max(last week, 1)) * 100
-        const favouritesTrend = favouritesLastWeek > 0 
-          ? Math.round(((favouritesThisWeek - favouritesLastWeek) / favouritesLastWeek) * 100)
-          : favouritesThisWeek > 0 ? 100 : 0;
-        const collectionsTrend = collectionsLastWeek > 0 
-          ? Math.round(((collectionsThisWeek - collectionsLastWeek) / collectionsLastWeek) * 100)
-          : collectionsThisWeek > 0 ? 100 : 0;
-        const mealPlansTrend = mealPlansLastWeek > 0 
-          ? Math.round(((mealPlansThisWeek - mealPlansLastWeek) / mealPlansLastWeek) * 100)
-          : mealPlansThisWeek > 0 ? 100 : 0;
-
-        // Generate weekly growth data (deterministic based on actual totals)
-        // Simulate historical data based on growth patterns
-        const avgWeeklyGrowth = totalUsers > 0 ? Math.max(0.05, growthRate / 400) : 0;
-        const weeklyGrowthData = Array.from({ length: 4 }, (_, i) => {
-          const weekMultiplier = Math.pow(1 - avgWeeklyGrowth, 3 - i);
-          return {
-            week: `Week ${i + 1}`,
-            users: Math.max(0, Math.round(totalUsers * weekMultiplier)),
-            actions: Math.max(0, Math.round(totalActions * weekMultiplier)),
-          };
-        });
-
-        // Predictions (based on actual growth patterns)
-        // If negative growth, estimate at least maintaining current users (floor at total)
-        const estimatedUsersNextMonth = Math.max(
-          totalUsers, 
-          Math.round(totalUsers * (1 + Math.max(growthRate, 0) / 100))
+        const insightsData = await getBusinessInsightsCached(() =>
+          getBusinessInsightsStats(),
         );
-        // Estimate actions based on current engagement rate
-        const estimatedActionsNextWeek = Math.max(
-          Math.round(avgActionsPerUser * totalUsers / 4),
-          Math.round((favouritesThisWeek + collectionsThisWeek + mealPlansThisWeek) * 1.1)
-        );
-        // Projected growth rate - use actual trend, capped at reasonable bounds
-        const projectedGrowthRate = Math.max(-50, Math.min(100, Math.round(growthRate * 0.8)));
-        
-        // Platform health score (0-100)
-        const healthScore = Math.min(100, Math.round(
-          (retentionRate * 0.3) + 
-          (engagementScore * 0.3) + 
-          (Math.min(totalUsers, 100) * 0.2) + 
-          (totalDbRecords > 0 ? 20 : 0)
-        ));
-
-        // Recommended focus based on metrics
-        let recommendedFocus = 'User Acquisition';
-        if (retentionRate < 50) recommendedFocus = 'User Retention & Engagement';
-        else if (engagementScore < 30) recommendedFocus = 'Feature Adoption';
-        else if (totalMealPlans < totalFavourites * 0.2) recommendedFocus = 'Meal Planning Features';
-        else if (totalShoppingLists < totalMealPlans * 0.3) recommendedFocus = 'Shopping List Conversion';
-
-        // AI Insights (simulated based on data patterns)
-        const topSearchTerms = [
-          { term: 'chicken', count: Math.floor(totalFavourites * 0.3) },
-          { term: 'pasta', count: Math.floor(totalFavourites * 0.25) },
-          { term: 'healthy', count: Math.floor(totalFavourites * 0.2) },
-          { term: 'quick dinner', count: Math.floor(totalFavourites * 0.15) },
-          { term: 'vegetarian', count: Math.floor(totalFavourites * 0.1) },
-        ];
-
-        const popularCuisines = [
-          { cuisine: 'Italian', percentage: 28 },
-          { cuisine: 'Asian', percentage: 24 },
-          { cuisine: 'American', percentage: 20 },
-          { cuisine: 'Mexican', percentage: 15 },
-          { cuisine: 'Mediterranean', percentage: 13 },
-        ];
-
-        const dietaryPreferences = [
-          { diet: 'No Restrictions', percentage: 45 },
-          { diet: 'Vegetarian', percentage: 20 },
-          { diet: 'Gluten-Free', percentage: 15 },
-          { diet: 'Vegan', percentage: 12 },
-          { diet: 'Keto', percentage: 8 },
-        ];
-
-        const peakUsagePattern = totalUsers > 10 
-          ? 'Evening (6-9 PM) shows highest activity, with secondary peak during lunch hours'
-          : 'Building user base - patterns will emerge with more data';
-
-        const userBehaviorSummary = totalUsers > 0
-          ? `Users average ${avgFavouritesPerUser} favourites and ${avgCollectionsPerUser} collections. ` +
-            `${retentionRate}% retention rate with ${engagementScore}/100 engagement score. ` +
-            `Meal planning adoption is ${totalMealPlans > 0 ? 'active' : 'low'}.`
-          : 'Awaiting user data for behavior analysis.';
-
-        // Build response
-        const insightsData = {
-          users: {
-            total: totalUsers,
-            newThisMonth: newUsersThisMonth,
-            newThisWeek: newUsersThisWeek,
-            newToday: newUsersToday,
-            activeToday: newUsersToday,
-            growthRate,
-            avgFavouritesPerUser,
-            avgCollectionsPerUser,
-            retentionRate,
-          },
-          recipes: {
-            totalFavourites,
-            totalCollections,
-            totalCollectionItems,
-            totalMealPlans,
-            totalMealPlanItems,
-            totalShoppingLists,
-            completedShoppingLists,
-            totalNotes,
-            totalFilterPresets,
-            avgItemsPerCollection,
-            avgMealsPerPlan,
-          },
-          content: {
-            totalBlogs: 0,
-            totalRecipeImages,
-            totalRecipeVideos,
-          },
-          engagement: {
-            totalUniqueRecipesSaved: uniqueRecipesSaved.length,
-            mostActiveDay,
-            peakHour: 19, // 7 PM
-            avgActionsPerUser,
-            engagementScore,
-          },
-          trends: {
-            userGrowthTrend: userGrowthTrend as 'rising' | 'stable' | 'declining',
-            engagementTrend: engagementTrend as 'rising' | 'stable' | 'declining',
-            favouritesTrend,
-            collectionsTrend,
-            mealPlansTrend,
-            weeklyGrowthData,
-          },
-          predictions: {
-            estimatedUsersNextMonth,
-            estimatedActionsNextWeek,
-            projectedGrowthRate,
-            recommendedFocus,
-            healthScore,
-          },
-          aiInsights: {
-            topSearchTerms,
-            popularCuisines,
-            dietaryPreferences,
-            peakUsagePattern,
-            userBehaviorSummary,
-          },
-          apiUsage: {
-            spoonacularCallsToday: 0,
-            spoonacularCallsThisMonth: 0,
-            weatherCallsToday: 0,
-            weatherCallsThisMonth: 0,
-          },
-          popularRecipes,
-          topContributors,
-          recentActivity,
-          systemHealth: {
-            databaseStatus: 'healthy' as const,
-            uptime: uptimeString,
-            totalDbRecords,
-            serverTime: now.toISOString(),
-            responseTime: Math.round(Date.now() - now.getTime()),
-            errorRate: 0,
-          },
-        };
-
         return jsonResponse({
           success: true,
           data: insightsData,
@@ -3641,7 +3189,7 @@ Return ONLY a JSON array of search query strings, like: ["soup", "stew", "curry"
             error: error instanceof Error ? error.message : "Failed to fetch insights",
             timestamp: new Date().toISOString(),
           },
-          500
+          500,
         );
       }
     }
@@ -3824,6 +3372,7 @@ export async function POST(
           data: { recipeId: recipeIdNum, userId: auth.userId! },
           select: { id: true, recipeId: true, userId: true },
         });
+        await bustInsightsCache();
         return jsonResponse(favouriteRecipe, 201);
       } catch (createError: unknown) {
         const error = createError as Error;
@@ -3886,6 +3435,7 @@ export async function POST(
         },
       });
 
+      await bustInsightsCache();
       return jsonResponse(
         {
           ...collection,
@@ -3961,6 +3511,7 @@ export async function POST(
         },
       });
 
+      await bustInsightsCache();
       return jsonResponse(
         {
           ...item,
@@ -4081,6 +3632,7 @@ export async function POST(
         },
       });
 
+      await bustInsightsCache();
       return jsonResponse(
         {
           ...mealItem,
@@ -4120,6 +3672,7 @@ export async function POST(
         },
       });
 
+      await bustInsightsCache();
       return jsonResponse(
         {
           ...shoppingList,
@@ -4345,6 +3898,7 @@ export async function POST(
         },
       });
 
+      await bustInsightsCache();
       return jsonResponse(
         {
           ...image,
@@ -5123,6 +4677,7 @@ Return ONLY a JSON object with this exact structure:
           },
         });
 
+        await bustInsightsCache();
         return jsonResponse(preset, 201);
       } catch (error) {
         console.error("Create filter preset error:", error);
@@ -5205,6 +4760,7 @@ Return ONLY a JSON object with this exact structure:
           },
         });
 
+        await bustInsightsCache();
         return jsonResponse(preset);
       } catch (error) {
         console.error("Update filter preset error:", error);
@@ -5250,6 +4806,7 @@ Return ONLY a JSON object with this exact structure:
           where: { id: presetId },
         });
 
+        await bustInsightsCache();
         return jsonResponse({
           success: true,
           message: "Filter preset deleted",
@@ -5388,6 +4945,7 @@ Return ONLY a JSON object with this exact structure:
           },
         });
 
+        await bustInsightsCache();
         return jsonResponse(video, 201);
       } catch (error) {
         console.error("Create recipe video error:", error);
@@ -5433,6 +4991,7 @@ Return ONLY a JSON object with this exact structure:
           where: { id: videoId },
         });
 
+        await bustInsightsCache();
         return jsonResponse({ success: true, message: "Video deleted" });
       } catch (error) {
         console.error("Delete recipe video error:", error);
@@ -5537,6 +5096,7 @@ Return ONLY a JSON object with this exact structure:
         },
       });
 
+      await bustInsightsCache();
       return jsonResponse({
         ...note,
         createdAt: note.createdAt.toISOString(),
@@ -5639,6 +5199,7 @@ export async function PUT(
         where: { id: collectionId },
       });
 
+      await bustInsightsCache();
       return jsonResponse({
         ...updated,
         createdAt: updated!.createdAt.toISOString(),
@@ -5710,6 +5271,7 @@ export async function PUT(
         data: updates,
       });
 
+      await bustInsightsCache();
       return jsonResponse({
         ...updated,
         items:
@@ -5812,6 +5374,7 @@ export async function DELETE(
         await prisma.favouriteRecipes.delete({ where: { id: existing.id } });
       }
 
+      await bustInsightsCache();
       return new NextResponse(null, { status: 204, headers: getCorsHeaders() });
     }
 
@@ -5832,6 +5395,7 @@ export async function DELETE(
         return jsonResponse({ error: "Collection not found" }, 404);
       }
 
+      await bustInsightsCache();
       return new NextResponse(null, { status: 204, headers: getCorsHeaders() });
     }
 
@@ -5886,6 +5450,7 @@ export async function DELETE(
         return jsonResponse({ error: "Item not found in collection" }, 404);
       }
 
+      await bustInsightsCache();
       return new NextResponse(null, { status: 204, headers: getCorsHeaders() });
     }
 
@@ -5912,6 +5477,7 @@ export async function DELETE(
         where: { id: itemId },
       });
 
+      await bustInsightsCache();
       return new NextResponse(null, { status: 204, headers: getCorsHeaders() });
     }
 
@@ -5942,6 +5508,7 @@ export async function DELETE(
         where: { id: String(id) },
       });
 
+      await bustInsightsCache();
       return new NextResponse(null, { status: 204, headers: getCorsHeaders() });
     }
 
@@ -5973,6 +5540,7 @@ export async function DELETE(
           where: { id: videoId },
         });
 
+        await bustInsightsCache();
         return jsonResponse({ success: true, message: "Video deleted" });
       } catch (error) {
         console.error("Delete recipe video error:", error);
@@ -6015,6 +5583,7 @@ export async function DELETE(
         where: { id: String(id) },
       });
 
+      await bustInsightsCache();
       return new NextResponse(null, { status: 204, headers: getCorsHeaders() });
     }
 
@@ -6049,6 +5618,7 @@ export async function DELETE(
         return jsonResponse({ error: "Note not found" }, 404);
       }
 
+      await bustInsightsCache();
       return new NextResponse(null, { status: 204, headers: getCorsHeaders() });
     }
 

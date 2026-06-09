@@ -16,12 +16,19 @@ import { RecipeProvider } from "../../context/RecipeContext";
 import BusinessInsightsDashboard from "../insights/BusinessInsightsDashboard";
 import Navbar from "../layout/Navbar";
 import Footer from "../layout/Footer";
+import type { BusinessInsightsResponse } from "../../types";
+
+interface BusinessInsightsPageClientProps {
+  initialInsights?: BusinessInsightsResponse;
+}
 
 /**
  * Business Insights Page Client Component
  * Contains all client-side logic and providers
  */
-export default function BusinessInsightsPageClient() {
+export default function BusinessInsightsPageClient({
+  initialInsights,
+}: BusinessInsightsPageClientProps) {
   return (
     <AuthProvider>
       <RecipeProvider>
@@ -37,7 +44,7 @@ export default function BusinessInsightsPageClient() {
         >
           <Navbar />
           <main className="flex-1 max-w-9xl mx-auto px-2 sm:px-4 md:px-6 xl:px-8 py-8 w-full">
-            <BusinessInsightsDashboard />
+            <BusinessInsightsDashboard initialInsights={initialInsights} />
           </main>
           <Footer />
         </div>

@@ -134,4 +134,6 @@ export const cacheKeys = {
   shoppingList: (userId: string) => `shopping:${userId}`,
   blogPosts: (skip: number, limit: number) => `blog:posts:${skip}:${limit}`,
   blogPost: (slug: string) => `blog:post:${slug}`,
+  /** Global platform stats (REQ-0020) — invalidated on user-data CRUD */
+  businessInsights: () => "business:insights",
 };

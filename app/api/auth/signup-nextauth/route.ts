@@ -93,6 +93,11 @@ export async function POST(request: NextRequest) {
     // Log successful signup (don't log password)
     console.log(`✅ User created: ${newUser.email} (ID: ${newUser.id})`);
 
+    const { invalidateBusinessInsightsCache } = await import(
+      "../../../../lib/redis-cache"
+    );
+    await invalidateBusinessInsightsCache();
+
     // Return success response
     return jsonResponse(
       {

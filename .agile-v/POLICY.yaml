@@ -1,0 +1,37 @@
+version: "1.0.0"
+project: recipe-spoonacular
+cycle: C1
+updated: "2026-03-25"
+
+gates:
+  gate_1:
+    required_artifacts:
+      - REQUIREMENTS.md
+      - RISK_REGISTER.md
+    human_approval: true
+  gate_2:
+    required_artifacts:
+      - VALIDATION_SUMMARY.md
+      - EVAL_RESULTS.md
+      - BUILD_MANIFEST.md
+    eval_gate_status: PASS
+    human_approval: true
+
+traceability:
+  req_id_pattern: "REQ-XXXX"
+  artifact_id_pattern: "ART-XXXX"
+  test_id_pattern: "TC-XXXX"
+  halt_on_missing_parent_req: true
+
+quality:
+  load_skills:
+    - agile-v-core
+    - agile-v-pipeline
+    - agile-v-quality-gates
+  no_self_verification: true
+  decision_log_append_only: true
+
+deployment:
+  production_host: vercel
+  bot_protection_recommended: true
+  ai_bots_block_recommended: true

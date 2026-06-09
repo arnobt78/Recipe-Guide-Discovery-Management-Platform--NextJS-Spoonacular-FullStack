@@ -63,7 +63,7 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
 import { useBusinessInsights } from "../../hooks/useBusinessInsights";
-import { BusinessInsightsStats } from "../../types";
+import { BusinessInsightsResponse, BusinessInsightsStats } from "../../types";
 
 /**
  * Color classes for cards and icons
@@ -445,8 +445,16 @@ const DashboardSkeleton = () => (
 /**
  * Main Dashboard Component
  */
-const BusinessInsightsDashboard = memo(() => {
-  const { data, isLoading, error, refetch, isFetching } = useBusinessInsights();
+interface BusinessInsightsDashboardProps {
+  initialInsights?: BusinessInsightsResponse;
+}
+
+const BusinessInsightsDashboard = memo(function BusinessInsightsDashboard({
+  initialInsights,
+}: BusinessInsightsDashboardProps) {
+  const { data, isLoading, error, refetch, isFetching } = useBusinessInsights({
+    initialData: initialInsights,
+  });
 
   if (isLoading) return <DashboardSkeleton />;
 
