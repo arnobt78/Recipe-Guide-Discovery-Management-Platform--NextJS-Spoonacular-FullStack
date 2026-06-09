@@ -375,7 +375,7 @@ export interface FavouriteRecipesResponse {
 export type TabType = "search" | "favourites" | "collections" | "meal-plan" | "shopping";
 
 /**
- * User interface - Auth0 user information
+ * User interface — NextAuth session user (Credentials or Google OAuth)
  */
 export interface User {
   id: string;

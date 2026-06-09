@@ -13,7 +13,7 @@ datasource db {
 model FavouriteRecipes {
   id        Int      @id @default(autoincrement())
   recipeId  Int
-  userId    String? // Auth0 user ID (optional for backward compatibility)
+  userId    String? // NextAuth user ID (nullable for legacy rows)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -32,7 +32,7 @@ model FavouriteRecipes {
  * Supports both OAuth users (no password) and Credentials users (with password)
  */
 model User {
-  id        String   @id // User ID (can be Auth0 ID, NextAuth ID, or custom)
+  id        String   @id // User ID (NextAuth JWT sub or custom, e.g. google_* / user_*)
   email     String   @unique
   name      String?
   picture   String?
